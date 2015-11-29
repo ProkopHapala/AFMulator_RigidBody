@@ -6,7 +6,7 @@ FLAGS = -std=c++11 -Og -g -w
 #FLAGS = -std=c++11 -O3 -ftree-vectorize -unroll-loops
 #FLAGS = -std=c++11 -O3 -ftree-vectorize -unroll-loops -ffast-math
 #FLAGS = -std=c++11 -O3 -ftree-vectorize -unroll-loops --param max-unroll-times=4 -ffast-math -march=native -mtune=native -mssse3
-SRC = main.cpp include/buttons.cpp #include/appMode.cpp
+SRC = main.cpp
 
 
 BIN = program.x

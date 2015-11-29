@@ -14,40 +14,63 @@
 //#define CHECK(NUM)
 // !!!
 
-#include "include/terminalAccessories.h"
-#include "include/Vec3.h"
-#include "include/Mat3.h"
-#include "include/quaternion.h"
-#include "include/raytrace.h"
+#include "include/IO/terminalAccessories.h"
 
-#include "include/readWriteProcedures.h"
-#include "include/dataManagement.h"
+#include "include/math/Vec3.h"
+#include "include/math/Mat3.h"
+#include "include/math/quaternion.h"
+#include "include/math/raytrace.h"
 
-#include "include/scanProcedures.h"
+#include "include/IO/readWriteProcedures.h"
 
-#include "include/settingProcedures.h"
-#include "include/drawMath.h"
-#include "include/drawUtils.h"
+//#include "include/IO/dataManagement.h"
 
-#include "include/fileManagement.h"
+#include "include/IO/dataWarper/dataWrapper.h"
+#include "include/IO/dataWarper/stringDataWrapper.h"
+#include "include/IO/dataWarper/scalarDataWrapper.h"
+#include "include/IO/dataWarper/vectorDataWrapper.h"
+#include "include/IO/dataWarper/vectorDataManager.h"
+#include "include/IO/dataWarper/quaterDataWrapper.h"
+#include "include/IO/dataWarper/quaterDataManager.h"
 
-#include "include/atomTypes.h"
-#include "include/moleculeType.h"
 
-#include "include/forceField.h"
-#include "include/surfProcedures.h"
-#include "include/tipProcedures.h"
+#include "include/app/scanProcedures.h"
 
-#include "include/optimizerDerivs.h"
-#include "include/physicalSystem.h"
-#include "include/buttons.h"
+#include "include/app/settingProcedures.h"
+#include "include/graphics/drawMath.h"
+#include "include/graphics/drawUtils.h"
 
-#include "include/mainAccessories.h"
-#include "include/Screen.h"
-#include "include/graphicalInterface.h"
+//#include "include/fileManagement.h"
+#include "include/IO/fileWrapper.h"
+#include "include/IO/fileManager.h"
 
-#include "include/appModes.h"
+#include "include/core/atomTypes.h"
+#include "include/core/moleculeType.h"
 
+#include "include/core/forceField.h"
+#include "include/core/surfProcedures.h"
+#include "include/core/tipProcedures.h"
+
+#include "include/math/optimizerDerivs.h"
+#include "include/core/physicalSystem.h"
+
+#include "include/graphics/alphabet.h"
+#include "include/graphics/button.h"
+#include "include/graphics/contextMenu.h"
+
+#include "include/IO/mainAccessories.h"
+#include "include/graphics/Screen.h"
+#include "include/graphics/graphicalInterface.h"
+
+#include "include/app/appMode.h"
+#include "include/app/appModeNoTip.h"
+#include "include/app/appModeView.h"
+#include "include/app/appModeRelax.h"
+#include "include/app/appModeTip.h"
+#include "include/app/appModeTipMol.h"
+#include "include/app/appModeTipMolOne.h"
+#include "include/app/appModeRaster.h"
+#include "include/app/appModeReplay.h"
 
 // ===============================
 // ===== GLOBAL VARIABLES
@@ -255,3 +278,10 @@ extern "C"{
 }
 
 
+
+
+
+/*
+int main( int argc, char *argv[] ){
+}
+*/
