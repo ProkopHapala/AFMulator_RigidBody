@@ -1,0 +1,11 @@
+# atomTypesFile - atom elements with characteristics
+InputData/atomTypes.dat
+
+# scanningParams - scanning parameters
+InputData/scanningParams3
+
+# moleculeParams - molecule parameters
+InputData/moleculeParams3
+
+# tipParams - tip parameters
+InputData/tipParams3

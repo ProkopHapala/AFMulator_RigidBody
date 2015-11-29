@@ -1,0 +1,25 @@
+# molecule parameters
+
+# num. of molecule structure types
+4
+
+# molecule structure files
+#InputData/largeCrystal.bas
+#InputData/largeCrystalVacancy.bas
+InputData/largeCrystal_centered.bas
+InputData/Na.bas
+InputData/Cl.bas
+#InputData/Water.bas
+InputData/WaterAugmented.bas
+
+# num. of molecule instances
+2
+
+# individual molecule instances, the number specifies of which type the given instance is
+0
+3
+
+# how each molecule is positioned and rotated
+InputData/geometry.dat
+raw
+
