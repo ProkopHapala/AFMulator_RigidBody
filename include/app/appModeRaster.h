@@ -110,6 +110,8 @@ void appModeRaster::loop( int n ){
 			abstractAppMode::world->tip->setPosition( xpos, ypos, zpos );
 			abstractAppMode::world->adjustMolToTip();
 
+			if( !abstractAppMode::suppressOutput ){	printf( "relaxing z-line (ix,iy) %5i %5i \n", xind, yind ); }
+
 			for( int zind = 0; zind < scan->zdim ; zind++ ){
 				
 				optimizingFlag = true;
@@ -117,7 +119,8 @@ void appModeRaster::loop( int n ){
 				
 				convergStep = 0;
 				ind = (scan->ydim - 1 - yind)*scan->xdim*scan->zdim + xind*scan->zdim + zind;
-						
+
+/*						
 				if( !abstractAppMode::suppressOutput ){		
 					if( abstractAppMode::graphics != NULL ){
 						if( !(ind % 200) ) printf( "index %7i out of %i reached\n", ind, total );
@@ -125,6 +128,7 @@ void appModeRaster::loop( int n ){
 						if( !(ind % 1000) ) printf( "index %7i out of %i reached\n", ind, total );
 					}
 				}
+*/
 				
 				for( int iframe = 0; iframe < n; iframe++ ){
 	
@@ -152,8 +156,10 @@ void appModeRaster::loop( int n ){
 						break;
 					}
 					if( convergStep > convergStepLimit ){
-						if( !abstractAppMode::suppressOutput )
-							printf( "appModeRaster::loop: Relaxation in step %5i does not converge. Skipped.\n", ind );
+						if( !abstractAppMode::suppressOutput ){
+//							printf( "appModeRaster::loop: Relaxation in step %5i does not converge. Skipped.\n", ind );
+							printf( "appModeRaster::loop: step (ix,iy,iz) %5i %5i %5i Relaxation not converge in %5i. Skipped.\n", xind, yind, zind, convergStepLimit );
+						}
 //						printf( "xind, yind, zind = %d %d %d\n", xind, yind, zind );
 						numOfNoncovergCases++;
 						break;
