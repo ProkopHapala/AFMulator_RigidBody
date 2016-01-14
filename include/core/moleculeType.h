@@ -63,13 +63,12 @@ class MoleculeType {
   		return 0;
 	}
 
-	bool loadMolecFromFile( char const* filename ){
+	bool loadFromFile( char const* filename ){
 		FILE* pFile = fopen( filename, "r" );
 		char str[400];
 		int count;
-		
 		if( pFile ){
-			printf( "loadMolecFromFile:\tMolecule loaded from\t\t%s.\n", filename );
+			printf( "MoleculeType::loadFromFile: \t %s.\n", filename );
 			readLineComment( pFile, str );
 	  		sscanf( str, " %i", &natoms );
 			allocateAtoms( natoms );
@@ -80,32 +79,27 @@ class MoleculeType {
 				if( count > 4 ){
 					Qs[i] = q;
 				} else {
-					printf( "loadMolecFromFile: Atom no. %i has no charge specified. Default value used instead.\n", i );
+					printf( "MoleculeType::loadFromFile: Atom no. %i has no charge specified. Default value used instead.\n", i );
 					Qs[i] = 0;
 				}
 				atypes[i]--;
 				//printf( " %i %f %f %f %f %f %i \n", atypes[i], xyzs[i].x, xyzs[i].y, xyzs[i].z, Qs[i], q, nw );
-				
 			}
 	  		fclose( pFile );
 	  		return true;
   		} else {
-			printf( "loadMolecFromFile: File %s cannot be loaded. Default value used instead.\n", filename );
-
+			printf( "MoleculeType::loadFromFile: File %s cannot be loaded. Default value used instead.\n", filename );
 			// DODELAT IMPLICITNI HODNOTY KDYZTAK
-  			
   			return false;
   		}
 	}
 	
-	bool loadMolecFromFile( fileWrapper* file ){
-
+	bool loadFromFile( fileWrapper* file ){
 		file->openRead();
 		char str[400];
 		int count;
-		
 		if( file->isOpened() ){
-			printf( "loadMolecFromFile:\tMolecule loaded from\t\t%s.\n", file->getFileName() );
+			printf( "MoleculeType::loadFromFile: \t %s.\n", file->getFileName() );
 			file->readLineToString( str );
 	  		sscanf( str, " %i", &natoms );
 			allocateAtoms( natoms );
@@ -116,20 +110,17 @@ class MoleculeType {
 				if( count > 4 ){
 					Qs[i] = q;
 				} else {
-					printf( "loadMolecFromFile: Atom no. %i has no charge specified. Default value used instead.\n", i );
+					printf( "MoleculeType::loadFromFile: Atom no. %i has no charge specified. Default value used instead.\n", i );
 					Qs[i] = 0;
 				}
 				atypes[i]--;
 				//printf( " %i %f %f %f %f %f %i \n", atypes[i], xyzs[i].x, xyzs[i].y, xyzs[i].z, Qs[i], q, nw );
-				
 			}
 			file->close();
 	  		return true;
   		} else {
-			printf( "loadMolecFromFile: File %s cannot be loaded. Default value used instead.\n", file->getFileName() );
-
+			printf( "MoleculeType::loadFromFile: File %s cannot be loaded. Default value used instead.\n", file->getFileName() );
 			// DODELAT IMPLICITNI HODNOTY KDYZTAK
-  			
   			return false;
   		}
 	}
@@ -137,16 +128,12 @@ class MoleculeType {
 	MoleculeType( char const* filename ){ loadFromFile_bas( filename ); init(); };
 	
 	MoleculeType( char const* filename, AtomTypes* typeList_, float bonds, float graphicsList_[4] /*float* graphicsList_*/ ){
-
-		printf( "filename = %s\n", filename );
-
-		if( loadMolecFromFile( filename ) ){
+		//printf( "filename = %s\n", filename );
+		if( loadFromFile( filename ) ){
 			init(); 	
-			
 			typeList = typeList_;
 			toCOG_average();
 			findBonds( bonds );
-
 			if( graphicsList_ != NULL ){
 				for( int i = 0; i < 4; i++) graphicsList[i] = graphicsList_[i];
 			}
@@ -158,7 +145,7 @@ class MoleculeType {
 
 	MoleculeType( fileWrapper* file, AtomTypes* typeList_, float bonds, float graphicsList_[4]/*float* graphicsList_*/ ){
 
-		if( loadMolecFromFile( file ) ){
+		if( loadFromFile( file ) ){
 			init(); 	
 			typeList = typeList_;
 			toCOG_average();

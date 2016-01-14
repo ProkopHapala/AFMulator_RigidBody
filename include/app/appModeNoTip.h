@@ -27,8 +27,10 @@ void appModeNoTip::setupApp( fileManager* moleculeFiles, AtomTypes* typeList, fi
 
 	// lenght of an array listOfFileNames is assumed to be less than the maximum of an array listOfMoleculeInstances!!!
 
+	printf( ">>> Initializing: appModeNoTip  " );
 	abstractAppMode::molp = new MoleculeType*[abstractAppMode::numOfMoleculeInstances];
 	for( int i = 0; i < abstractAppMode::numOfMoleculeInstances; i++ ){
+		printf( " initialize MoleculeType from \n", (*moleculeFiles)[i]->getFileName() );
 		if( abstractAppMode::graphics != NULL ){
 			abstractAppMode::molp[i] = new MoleculeType( (*moleculeFiles)[i]->getFileName(), typeList, 0.5, abstractAppMode::graphics->viewMolList );
 		} else {

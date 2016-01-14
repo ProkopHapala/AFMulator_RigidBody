@@ -23,7 +23,7 @@ void setScanningParams( const char* filename, zSamplingMode& zSampling,
 
 		readLineComment( scanFile, str );
 		count = sscanf( str, " %399s", &auxStr );		
-		if(	   !strcmp( auxStr, "SCANNING_NONE" )	   ){ scanType = SCANNING_NONE;
+		if       ( !strcmp( auxStr, "SCANNING_NONE" )	   ){ scanType = SCANNING_NONE;
 		} else if( !strcmp( auxStr, "SCANNING_NONE_VIEW" ) ){ scanType = SCANNING_NONE_VIEW;
 		} else if( !strcmp( auxStr, "SCANNING_RASTER" )    ){ scanType = SCANNING_RASTER;
 		} else if( !strcmp( auxStr, "SCANNING_REPLAY" )    ){ scanType = SCANNING_REPLAY;
@@ -43,7 +43,7 @@ void setScanningParams( const char* filename, zSamplingMode& zSampling,
 
 			readLineComment( scanFile, str );
 			count = sscanf( str, " %399s", &auxStr );
-			if(	   !strcmp( auxStr, "number" ) ){ inputType = SCAN_STEP_NUM;	// number of steps
+			if       ( !strcmp( auxStr, "number" ) ){ inputType = SCAN_STEP_NUM;	// number of steps
 			} else if( !strcmp( auxStr, "length" ) ){ inputType = SCAN_STEP_DIM;	// lengths of each step
 			} else {
 				inputType = SCAN_STEP_NUM;
@@ -53,7 +53,7 @@ void setScanningParams( const char* filename, zSamplingMode& zSampling,
 			readLineComment( scanFile, str );
 			count = sscanf( str, " %399s", &auxStr );
 //			printf( "%s\n", str ); // !!!
-			if(	   !strcmp( auxStr, "Z_SAMPLE_EQUIDIST" )	){ zSampling = Z_SAMPLE_EQUIDIST;
+			if       ( !strcmp( auxStr, "Z_SAMPLE_EQUIDIST" )	){ zSampling = Z_SAMPLE_EQUIDIST;
 			} else if( !strcmp( auxStr, "Z_SAMPLE_LINEAR" )		){ zSampling = Z_SAMPLE_LINEAR;
 			} else if( !strcmp( auxStr, "Z_SAMPLE_QUAD" )		){ zSampling = Z_SAMPLE_QUAD;
 			} else {
@@ -96,17 +96,10 @@ void setScanningParams( const char* filename, zSamplingMode& zSampling,
 			printf( "setScanningParams:\tLengths of steps in each dimension: xstep, ystep, zstep = %.3lf %.3lf %.3lf\n", xstep, ystep, zstep );
 			printf( "setScanningParams:\tMinimum length of z-step: minStep = %.3lf\n", minStep );
 			
-			readLineComment( scanFile, str );
-			count = sscanf( str, "%lf", &glob_dtmax );
-
-			readLineComment( scanFile, str );
-			count = sscanf( str, "%lf", &glob_damping );
-
-			readLineComment( scanFile, str );
-			count = sscanf( str, "%i", &glob_maxIters );
-
-			readLineComment( scanFile, str );
-			count = sscanf( str, "%i", &numMolOfInterest );
+			readLineComment( scanFile, str );	count = sscanf( str, "%lf", &glob_dtmax );
+			readLineComment( scanFile, str );	count = sscanf( str, "%lf", &glob_damping );
+			readLineComment( scanFile, str );	count = sscanf( str, "%i", &glob_maxIters );
+			readLineComment( scanFile, str );	count = sscanf( str, "%i", &numMolOfInterest );
 
 			molOfInterest = new int[numMolOfInterest];
 			
@@ -132,10 +125,7 @@ void setScanningParams( const char* filename, zSamplingMode& zSampling,
 
 }
 
-void setScanningParams( const char* filename, scanSpecification*& scan,
-	relaxParams* relaxParameters, int*& molOfInterest, int& numMolOfInterest
-	){
-
+void setScanningParams( const char* filename, scanSpecification*& scan,	relaxParams* relaxParameters, int*& molOfInterest, int& numMolOfInterest){
 	setScanningParams( filename, scan->zSampling,
 	scan->scanType, scan->minStep, scan->xoffset, scan->yoffset, scan->zoffset,
 	scan->xstep, scan->ystep, scan->zstep, scan->xdim, scan->ydim, scan->zdim,
@@ -144,17 +134,18 @@ void setScanningParams( const char* filename, scanSpecification*& scan,
 
 }
 
-void setMoleculeParams( const char* filename, int*& listOfMoleculeInstances, std::string*& listOfFileNames,
-	int& numOfMoleculeInstances, int& numOfMoleculeTypes, char* world_data, bool& raw_data
-	){
+void setMoleculeParams( const char* filename, int*& listOfMoleculeInstances, std::string*& listOfFileNames,	int& numOfMoleculeInstances, int& numOfMoleculeTypes, char* world_data, bool& raw_data	){
+//void setMoleculeParams( const char* filename, int** listOfMoleculeInstances, std::string** listOfFileNames,	int& numOfMoleculeInstances, int& numOfMoleculeTypes, char* world_data, bool& raw_data	){
+//void setMoleculeParams( const char* filename, int* listOfMoleculeInstances, std::string* listOfFileNames,	int& numOfMoleculeInstances, int& numOfMoleculeTypes, char* world_data, bool& raw_data	){
 // set parameters pertaining to molecule geometry
 	
+	printf( "isinde: setMoleculeParams() \n " );
 	char raw_data_str[40], fileNameLoc[400], str[400];
 	int count, molInst;
 	
 	FILE* molFile = fopen( filename, "r" );
 	if( molFile ){
-		printf( "setMoleculeParams:\tValues loaded from\t\t%s.\n", filename );
+		printf( "setMoleculeParams:    Values loaded from\t\t%s.\n", filename );
 		
 		readLineComment( molFile, str );
 		count = sscanf( str, "%i", &numOfMoleculeTypes );
@@ -164,14 +155,16 @@ void setMoleculeParams( const char* filename, int*& listOfMoleculeInstances, std
 			readLineComment( molFile, str );
 			count = sscanf( str, "%399s", &fileNameLoc );			
 			listOfFileNames[i].assign( fileNameLoc );
-//			printf( "listOfFileNames[%i] = %s\n", i, listOfFileNames[i].c_str() );
+			//printf( " ---listOfFileNames[%i] = %s\n", i, listOfFileNames[i].c_str() );
 		}
+//		printf( " listOfFileNames %i \n", listOfFileNames );
 		
 		readLineComment( molFile, str );
 		count = sscanf( str, "%i", &numOfMoleculeInstances );
 //		printf( "numOfMoleculeInstances = %d\n", numOfMoleculeInstances );
 		if( numOfMoleculeInstances > 1 ) delete [] listOfMoleculeInstances; // ???
 		listOfMoleculeInstances = new int[numOfMoleculeInstances];
+
 		for( int i = 0; i < numOfMoleculeInstances; i++ ){
 			readLineComment( molFile, str );
 			count = sscanf( str, "%i", &molInst );
@@ -179,7 +172,7 @@ void setMoleculeParams( const char* filename, int*& listOfMoleculeInstances, std
 				printf( "setMoleculeParams: Out of bounds!!!\n" );
 			}
 			listOfMoleculeInstances[i] = molInst;
-//			printf( "listOfMoleculeInstances[%i] = %i\n", i, listOfMoleculeInstances[i] );
+			//printf( "listOfMoleculeInstances[%i] = %i\n", i, listOfMoleculeInstances[i] );
 		}
 
 		readLineComment( molFile, str );
@@ -200,7 +193,7 @@ void setMoleculeParams( const char* filename, int*& listOfMoleculeInstances, std
 		numOfMoleculeTypes = 1;
 		numOfMoleculeInstances = 5;
 		
-		if( numOfMoleculeTypes > 1 ) delete [] listOfFileNames; // ???
+		if( numOfMoleculeTypes     > 1 ) delete [] listOfFileNames; // ???
 		if( numOfMoleculeInstances > 1 ) delete [] listOfMoleculeInstances; // ???
 		
 		listOfFileNames = new std::string[numOfMoleculeTypes];
@@ -224,24 +217,16 @@ void setConfFiles( const char* confFilesCommander, char* atomTypesFile, char* sc
 	FILE* confFilesCommanderFile = fopen( confFilesCommander, "r" );
 	if( confFilesCommanderFile == NULL ){
 		printf( "setConfFiles: File %s cannot be opened. Default setting used instead.\n", confFilesCommander );
-		strcpy( atomTypesFile, "InputData/atomTypes.dat" );
+		strcpy( atomTypesFile,  "InputData/atomTypes.dat" );
 		strcpy( scanningParams, "InputData/scanningParams" );
 		strcpy( moleculeParams, "InputData/moleculeParams" );
-		strcpy( tipParams, "InputData/tipParams" );
-
+		strcpy( tipParams,      "InputData/tipParams" );
+ 
 	} else {
-		readLineComment( confFilesCommanderFile, str );
-		count = sscanf( str, "%399s", atomTypesFile );
-
-		readLineComment( confFilesCommanderFile, str );
-		count = sscanf( str, "%399s", scanningParams );
-
-		readLineComment( confFilesCommanderFile, str );
-		count = sscanf( str, "%399s", moleculeParams );
-
-		readLineComment( confFilesCommanderFile, str );
-		count = sscanf( str, "%399s", tipParams );
-
+		readLineComment( confFilesCommanderFile, str ); 	count = sscanf( str, "%399s", atomTypesFile );
+		readLineComment( confFilesCommanderFile, str ); 	count = sscanf( str, "%399s", scanningParams );
+		readLineComment( confFilesCommanderFile, str ); 	count = sscanf( str, "%399s", moleculeParams );
+		readLineComment( confFilesCommanderFile, str ); 	count = sscanf( str, "%399s", tipParams );
 		fclose( confFilesCommanderFile );
 	}
 		

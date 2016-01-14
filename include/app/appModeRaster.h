@@ -50,23 +50,9 @@ appModeRaster::appModeRaster( int numOfMoleculeInstances, fileManager* moleculeF
 void appModeRaster::loop( int n ){
 // 2D scanning loop
 			
-	if( abstractAppMode::world == NULL ){
-		printf( "appModeRaster::loop: No world exists. Halt.\n" );
-		return;
-	}
-	
-	if( abstractAppMode::world->nmols < 2 ){
-		printf( "appModeRaster::loop: Trivial world. Halt.\n" );
-		return;
-	}
+	if( abstractAppMode::world == NULL    ){ printf( "appModeRaster::loop: No world exists. Halt.\n" );	return;	}
+	if( abstractAppMode::world->nmols < 2 ){ printf( "appModeRaster::loop: Trivial world. Halt.\n" );	return;	}
 		
-	// declarations and initialization
-	double	xpos, ypos, zpos, pixelDataListItem;
-	int	ind, convergStep, numOfNoncovergCases = 0;
-	bool	optimizingFlag = true, loopContinue = false;
-	bool	loopEnd = false, stopFlag = false;
-	int	total = (scan->xdim)*(scan->ydim)*(scan->zdim);
-	
 	bool	saveMolOfInterestMovement = false;
 	if( outputPositMolFiles != NULL && outputRotatMolFiles != NULL ){
 		saveMolOfInterestMovement = true;	
@@ -80,6 +66,7 @@ void appModeRaster::loop( int n ){
 	}
 	
 	// allocation of data lists
+	int	    total      = (scan->xdim)*(scan->ydim)*(scan->zdim);
 	int metadataList[] = { scan->xdim, scan->ydim, scan->zdim, total };
 	
 	scalarDataWrapper* pixelDataList = new scalarDataWrapper( total, metadataList, "pixels" );
@@ -98,15 +85,20 @@ void appModeRaster::loop( int n ){
 	scan->createZSamplingSequenceLoc( zSteps );
 			
 	// scanning loop
+
+	int  ind                 = 0;
+	int	 numOfNoncovergCases = 0;
+	bool loopEnd             = false;
 	printf( "\n=== CALCULATION LOOP INITIATED ===\n" );
-	for( int yind = scan->ydim - 1; yind >= 0 ; yind-- ){
+	for( int yind = scan->ydim - 1; yind >= 0; yind++ ){
+	//for( int yind = 0; yind < scan->ydim ; yind++ ){
 	
-		ypos = yind*scan->ystep + scan->yoffset;
+		double ypos = yind*scan->ystep + scan->yoffset;
 		for( int xind = 0; xind < scan->xdim; xind++ ){
 
-			xpos = xind*scan->xstep + scan->xoffset;
+			double xpos = xind*scan->xstep + scan->xoffset;
 
-			zpos = scan->zoffset;
+			double zpos = scan->zoffset;
 			abstractAppMode::world->tip->setPosition( xpos, ypos, zpos );
 			abstractAppMode::world->adjustMolToTip();
 
@@ -114,10 +106,9 @@ void appModeRaster::loop( int n ){
 
 			for( int zind = 0; zind < scan->zdim ; zind++ ){
 				
-				optimizingFlag = true;
-				loopContinue = false;
+
 				
-				convergStep = 0;
+				int convergStep = 0;
 				ind = (scan->ydim - 1 - yind)*scan->xdim*scan->zdim + xind*scan->zdim + zind;
 
 /*						
@@ -129,7 +120,13 @@ void appModeRaster::loop( int n ){
 					}
 				}
 */
-				
+
+
+				double pixelDataListItem;
+				bool optimizingFlag = true;
+				bool loopContinue   = false;
+				bool stopFlag       = false;
+
 				for( int iframe = 0; iframe < n; iframe++ ){
 	
 					// handle input events
@@ -165,11 +162,10 @@ void appModeRaster::loop( int n ){
 						break;
 					}
 					
-					if( abstractAppMode::delay || stopFlag ){
-						SDL_Delay( 20 );
-					}
+					if( abstractAppMode::delay || stopFlag ){ SDL_Delay( 20 ); }
 
-				}
+				} // iframe
+
 				if( loopEnd ) break;
 						
 				// saving data to lists			
@@ -188,12 +184,12 @@ void appModeRaster::loop( int n ){
 				zpos -= (*zSteps)[zind]; // movement downwards!!!
 				abstractAppMode::world->tip->setPosition( xpos, ypos, zpos );
 				
-			}
+			} // zind
 			if( loopEnd ) break;
 			resetup();
-		}
+		} // xind
 		if( loopEnd ) break;
-	}
+	} // yind
 
 	printf( "\n=== SCANNING SUMMARY ===\n" );		
 	if( loopEnd ) printf( "appModeRaster::loop: Last index calculated is %i out of %i.\n", ind, total );

@@ -286,7 +286,7 @@ PhysicalSystem::PhysicalSystem( char const* filename, int numOfMoleculeInstances
 		printf( "PhysicalSystem: File %s cannot be opened. Default physical system created.\n", filename );
 		nmols		= 0;
 		molecules	= NULL;
-		tip		= NULL;	
+		tip		    = NULL;	
 		surf		= NULL;
 	} else {
 		printf( "PhysicalSystem:\t\tLoading physical system from\t%s.\n", filename );
@@ -409,10 +409,10 @@ void PhysicalSystem::resetGeometry( fileWrapper* file, Vec3d posProbe, Quat4d ro
 		printf( "resetGeometry: File %s cannot be opened. Default geometry used instead.\n", file->getFileName() );
 		nmols		= 0;
 		molecules	= NULL;
-		tip		= NULL;	
+		tip		    = NULL;	
 		surf		= NULL;	
 	} else {
-//		printf( "resetGeometry: Reseting geometry based on values from %s.\n", file->getFileName() );
+		printf( "resetGeometry: Reseting geometry based on values from %s.\n", file->getFileName() );
 
 		int aux, aux2, count;
 		Mat3d M;
@@ -426,11 +426,9 @@ void PhysicalSystem::resetGeometry( fileWrapper* file, Vec3d posProbe, Quat4d ro
 		for( int i = 0; i < nmols - 1; i++ ){
 			file->readLineToString( str );
 			if( file->isRaw() ){
-				count = sscanf( str, "%i	%lf %lf %lf	%lf %lf %lf %lf	%i", \
-					&aux,	&pos[i].x, &pos[i].y, &pos[i].z,	&rot[i].x, &rot[i].y, &rot[i].z, &rot[i].w,	&aux2 );
+				count = sscanf( str, "%i	%lf %lf %lf	%lf %lf %lf %lf	%i", &aux,	&pos[i].x, &pos[i].y, &pos[i].z,	&rot[i].x, &rot[i].y, &rot[i].z, &rot[i].w,	&aux2 );
 			} else {
-				sscanf( str, "%i	%lf %lf %lf     %lf %lf %lf     %lf %lf %lf	%i", \
-					&aux, &pos[i].x, &pos[i].y, &pos[i].z,    &M.ax, &M.ay, &M.az,    &M.bx, &M.by, &M.bz,	&aux2 );
+				sscanf( str, "%i	%lf %lf %lf     %lf %lf %lf     %lf %lf %lf	%i", &aux, &pos[i].x, &pos[i].y, &pos[i].z,    &M.ax, &M.ay, &M.az,    &M.bx, &M.by, &M.bz,	&aux2 );
 				M.a.normalize();	
 				M.b.add_mul( M.a, -M.a.dot( M.b ) );
 				M.b.normalize();
@@ -473,11 +471,9 @@ void PhysicalSystem::resetGeometry( char const* filename, Vec3d posProbe, Quat4d
 			readLineComment( pFile, str );
 			
 			if( raw ){
-				count = sscanf( str, "%i	%lf %lf %lf	%lf %lf %lf %lf	%i", \
-					&aux,	&pos[i].x, &pos[i].y, &pos[i].z,	&rot[i].x, &rot[i].y, &rot[i].z, &rot[i].w,	&aux2 );
+				count = sscanf( str, "%i	%lf %lf %lf	%lf %lf %lf %lf	%i", &aux,	&pos[i].x, &pos[i].y, &pos[i].z,	&rot[i].x, &rot[i].y, &rot[i].z, &rot[i].w,	&aux2 );
 			} else {
-				fscanf( pFile, "%i	%lf %lf %lf     %lf %lf %lf     %lf %lf %lf	%i", \
-					&aux, &pos[i].x, &pos[i].y, &pos[i].z,    &M.ax, &M.ay, &M.az,    &M.bx, &M.by, &M.bz,	&aux2 );
+				fscanf( pFile, "%i	%lf %lf %lf     %lf %lf %lf     %lf %lf %lf	%i", &aux, &pos[i].x, &pos[i].y, &pos[i].z,    &M.ax, &M.ay, &M.az,    &M.bx, &M.by, &M.bz,	&aux2 );
 				M.a.normalize();	
 				M.b.add_mul( M.a, -M.a.dot( M.b ) );
 				M.b.normalize();

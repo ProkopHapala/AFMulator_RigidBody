@@ -145,15 +145,19 @@ void setupApp( bool& loopEnd ){
 
 	printf( "setupApp: === APPLICATION SETUP... ===\n" );
 
-	std::string* listOfFileNames = new std::string[1];
-	int* listOfMoleculeInstances = new int[1];
+	//std::string* listOfFileNames         = new std::string[1];
+	//int*         listOfMoleculeInstances = new int[1];
+
+	std::string* listOfFileNames         = NULL;
+	int*         listOfMoleculeInstances = NULL;
+
 	std::string probeMolFileName;
 	
 	// set parameters from external files
 
 	setScanningParams( scanningParams, scan, relaxParameters, molOfInterest, numMolOfInterest );
-	setMoleculeParams( moleculeParams, listOfMoleculeInstances, listOfFileNames,
-		numOfMoleculeInstances, numOfMoleculeTypes, geometryFileName, raw_data );
+
+	setMoleculeParams( moleculeParams, listOfMoleculeInstances, listOfFileNames,numOfMoleculeInstances, numOfMoleculeTypes, geometryFileName, raw_data );
 	
 	typeList = new AtomTypes( atomTypesFile );
 	surf	 = new surfVert( surfSettingFile );
@@ -163,9 +167,13 @@ void setupApp( bool& loopEnd ){
 	tip	 = new tipOnePointMol( tipParams, surf_hat_inv );
 			
 	// allocate molecules and create the world
-	
+
 	fileWrapper* geometryFile  = new fileWrapper( geometryFileName, raw_data );
 	fileManager* moleculeFiles = new fileManager( numOfMoleculeInstances, listOfFileNames, listOfMoleculeInstances );
+
+	//for ( int i=0; i<numOfMoleculeTypes; i++ ){
+	//	printf( "--listOfFileNames %i %i : %s | %s \n", i, listOfMoleculeInstances[i], listOfFileNames[i].c_str(), (*moleculeFiles)[i]->getFileName() );
+	//}
 	
 	fileManager* outputFiles = NULL;
 	outputFiles = new fileManager( 4, outputDataPrefix );
@@ -180,21 +188,24 @@ void setupApp( bool& loopEnd ){
 	
 	switch( scan->scanType ){
 		case SCANNING_NONE_VIEW:
+			printf( ">>> Initializing: appModeView \n" );
 			app = new appModeView( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics );
 			break;
 		case SCANNING_NONE:
+			printf( ">>>  Initializing: appModeRelax \n" );
 			app = new appModeRelax( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, flags );
 			break;
 		case SCANNING_ONE:
+			printf( ">>> Initializing: appModeTipMolOne \n" );
 			app = new appModeTipMolOne( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags );
 			break;
 		case SCANNING_RASTER:
-			app = new appModeRaster( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, 
-				scan, outputFiles, relaxParameters, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
+			printf( ">>> Initializing: appModeRaster \n" );
+			app = new appModeRaster( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, relaxParameters, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
 			break;
 		case SCANNING_REPLAY:
-			app = new appModeReplay( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, 
-				scan, outputFiles, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
+			printf( ">>> Initializing: appModeReplay \n" );
+			app = new appModeReplay( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
 			break;
 	}
 	
@@ -244,13 +255,15 @@ int main( int argc, char *argv[] ){
 	}
 			
 	// setup application
+	printf( ">>> setConfFiles \n" );
 	setConfFiles( confFilesCommander, atomTypesFile, scanningParams, moleculeParams, tipParams );
+	printf( ">>> setupApp() \n" );
 	setupApp( loopEnd );
 	if( loopEnd ) exit( 1 );
 		
 	startTime = clock();
 
-	// loop itself	
+	printf( ">>> app->Loop() \n" );
 	app->loop( 1e6 );
 
 	// calculate the time for which the main loop has been executed
@@ -271,17 +284,5 @@ int main( int argc, char *argv[] ){
 // ===== Export this functions to Dynamic library for Python
 // ==========================================================
 
-extern "C"{
+extern "C"{ }
 
-
-
-}
-
-
-
-
-
-/*
-int main( int argc, char *argv[] ){
-}
-*/
