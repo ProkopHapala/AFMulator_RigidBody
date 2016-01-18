@@ -6,7 +6,7 @@ class appModeNoTip : public abstractAppMode {
 	
 	appModeNoTip(){};
 	~appModeNoTip();
-	appModeNoTip( int numOfMoleculeInstances_, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics_, flagList *flags = NULL );
+	appModeNoTip( int numOfMoleculeInstances_, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, flagList *flags = NULL );
 	
 	void setupApp( fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf );
 	
@@ -15,9 +15,9 @@ class appModeNoTip : public abstractAppMode {
 
 // ================= appModeNoTip procedures ================= 
 
-appModeNoTip::appModeNoTip( int numOfMoleculeInstances_, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics_, flagList *flags )
+appModeNoTip::appModeNoTip( int numOfMoleculeInstances_, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, flagList *flags )
 // constructor
-: abstractAppMode( graphics_, numOfMoleculeInstances_, flags )
+: abstractAppMode( numOfMoleculeInstances_, flags )
 {
 	setupApp( moleculeFiles, typeList, geometryFile, surf );
 }

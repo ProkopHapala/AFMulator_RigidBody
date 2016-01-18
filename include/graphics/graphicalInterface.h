@@ -12,8 +12,8 @@ class graphInterface : Screen {
 	
 	static const int nScreensMax;
 	Screen* thisScreen = NULL;
-	Screen** screens = NULL;
-	Uint32* screensID = NULL;
+	Screen** screens   = NULL;
+	Uint32* screensID  = NULL;
 	
 	static float viewMolList[4];			// parameters for molecules' look, KDYZTAK DODELAT
 	
@@ -28,7 +28,7 @@ class graphInterface : Screen {
 	~graphInterface();	
 	
 	void setActiveScreen( Uint32 windowID );
-	void inputHandling( bool& loopEnd, bool& loopContinue, bool& stopFlag );
+	virtual void inputHandling( bool& loopEnd, bool& loopContinue, bool& stopFlag );
 	void inputHandling( bool& loopEnd, bool& loopContinue, bool& stopFlag, moveReplayScanMode& moveReplayScan );
 	
 	void updateGraphics();
@@ -55,7 +55,7 @@ graphInterface::graphInterface( graphInterface* graphics ){
 	scanningBoxFlag = graphics->scanningBoxFlag;
 	world = graphics->world;	// KDYZTAK PREDELAT
 	
-	screens = new Screen*[nScreensMax];
+	screens   = new Screen*[nScreensMax];
 	screensID = new Uint32[nScreensMax];
 	
 	int sid;
