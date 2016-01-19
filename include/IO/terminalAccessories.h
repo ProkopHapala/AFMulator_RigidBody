@@ -3,19 +3,15 @@
 #define _TERMINAL_ACCESSORIES_
 
 struct relaxParams {
-
 	double glob_dtmax, glob_damping;
 	int    glob_maxIters;
-
 };
 
 struct flagList {
-
-	bool graphicalMode	= true;
-	bool scanningBoxFlag	= true;
-	bool suppressOutput	= false;
-	bool delay		= false;
-
+	bool graphicalMode	 = true;
+	bool scanningBoxFlag = true;
+	bool suppressOutput	 = false;
+	bool delay		     = false;
 };
 
 // terminal parameters

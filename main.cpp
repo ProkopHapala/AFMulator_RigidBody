@@ -189,23 +189,23 @@ void setupApp( bool& loopEnd ){
 	switch( scan->scanType ){
 		case SCANNING_NONE_VIEW:
 			printf( ">>> Initializing: appModeView \n" );
-			app = new appModeView( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics );
+			app = new appModeView( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, flags );
 			break;
 		case SCANNING_NONE:
 			printf( ">>>  Initializing: appModeRelax \n" );
-			app = new appModeRelax( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, flags );
+			app = new appModeRelax( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, flags );
 			break;
 		case SCANNING_ONE:
 			printf( ">>> Initializing: appModeTipMolOne \n" );
-			app = new appModeTipMolOne( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags );
+			app = new appModeTipMolOne( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, tip, flags );
 			break;
 		case SCANNING_RASTER:
 			printf( ">>> Initializing: appModeRaster \n" );
-			app = new appModeRaster( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, relaxParameters, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
+			app = new appModeRaster( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, tip, flags, scan, outputFiles, relaxParameters, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
 			break;
 		case SCANNING_REPLAY:
 			printf( ">>> Initializing: appModeReplay \n" );
-			app = new appModeReplay( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
+			app = new appModeReplay( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, tip, flags, scan, outputFiles, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
 			break;
 	}
 	
@@ -246,6 +246,7 @@ int main( int argc, char *argv[] ){
 	atexit( terminateApp );
 
 	// if in graphical mode, create screens
+	/*
 	if( flags->graphicalMode ){
 		printf( "\n=== GRAPHICAL MODE SELECTED ===\n" );
 		graphics = new graphInterface();
@@ -253,6 +254,7 @@ int main( int argc, char *argv[] ){
 		printf( "\n=== NON-GRAPHICAL MODE SELECTED ===\n" );
 		graphics = NULL;
 	}
+	*/
 			
 	// setup application
 	printf( ">>> setConfFiles \n" );

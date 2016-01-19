@@ -5,7 +5,7 @@ class appModeView : public appModeNoTip {
 	public:
 	
 	appModeView(){};
-	appModeView( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics, flagList *flags = NULL );
+	appModeView( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, flagList *flags = NULL );
 	
 	void loop( int n );
 	
@@ -14,7 +14,7 @@ class appModeView : public appModeNoTip {
 
 // ================= appModeView procedures ================= 
 
-appModeView::appModeView( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics, flagList *flags )
+appModeView::appModeView( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, flagList *flags )
 // constructor
 : appModeNoTip( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, flags )
 {

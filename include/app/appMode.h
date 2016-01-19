@@ -201,8 +201,8 @@ void abstractAppMode::setupGraphics( bool scanningBoxFlag_ ){
 
 abstractAppMode::abstractAppMode( int numOfMoleculeInstances_, flagList *flags ){
 	numOfMoleculeInstances = numOfMoleculeInstances_;
-	setupGraphics( false );
 	if( flags != NULL ){
+		if( flagList->graphicalMode ) setupGraphics( flags->scanningBoxFlag );
 		delay = flags->delay;
 		suppressOutput = flags->suppressOutput;
 	} else {
