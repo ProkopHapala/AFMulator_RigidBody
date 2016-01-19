@@ -4,7 +4,7 @@ class appModeRaster : public appModeTipMol {
 
 	public:
 
-	scanSpecification* scan = NULL;
+	scanSpecification* scan  = NULL;
 	fileManager* outputFiles = NULL;
 	fileManager* outputPositMolFiles = NULL;
 	fileManager* outputRotatMolFiles = NULL;
@@ -12,7 +12,7 @@ class appModeRaster : public appModeTipMol {
 	void resetup( void );
 	
 	int convergStepLimit = 0;
-	int* molOfInterest = NULL;
+	int* molOfInterest   = NULL;
 	int numMolOfInterest = 0;
 
 	appModeRaster(){};
@@ -76,7 +76,7 @@ void appModeRaster::loop( int n ){
 	vectorDataManager* positMolDataList = NULL;
 	quaterDataManager* rotatMolDataList = NULL;
 	if( saveMolOfInterestMovement ){
-		positMolDataList = new vectorDataManager( numMolOfInterest, total, metadataList, "mol. trajectories" );
+		positMolDataList = new vectorDataManager( numMolOfInterest, total, metadataList, "mol. trajectories" ); 
 		rotatMolDataList = new quaterDataManager( numMolOfInterest, total, metadataList, "mol. orientations" );
 	}
 	
@@ -90,7 +90,7 @@ void appModeRaster::loop( int n ){
 	int	 numOfNoncovergCases = 0;
 	bool loopEnd             = false;
 	printf( "\n=== CALCULATION LOOP INITIATED ===\n" );
-	for( int yind = scan->ydim - 1; yind >= 0; yind++ ){
+	for( int yind = scan->ydim - 1; yind >= 0; yind-- ){
 	//for( int yind = 0; yind < scan->ydim ; yind++ ){
 	
 		double ypos = yind*scan->ystep + scan->yoffset;

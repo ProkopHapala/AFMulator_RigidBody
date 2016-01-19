@@ -6,6 +6,13 @@
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_ttf.h>
 
+//typedef void (*TInputHandlerFunc)( const SDL_Event& event);
+
+class InputHandler{
+	public:
+	virtual void handleInput( const SDL_Event& event ) = 0;
+};
+
 class graphInterface : Screen {
 
 	public:
@@ -20,6 +27,10 @@ class graphInterface : Screen {
 	SDL_Event event;
 	bool scanningBoxFlag;
 	PhysicalSystem* world;
+
+	InputHandler * userInputHandler = NULL;
+
+	// ===== functions
 
 	graphInterface( graphInterface* graphics );
 	graphInterface( bool scanningBoxFlag = true );
@@ -205,6 +216,8 @@ void graphInterface::inputHandling( bool& loopEnd, bool& loopContinue, bool& sto
 				break;
 			
 		}
+
+		if( userInputHandler != NULL ){ userInputHandler->handleInput( event );	}
 		
 //		if( graphicalMode && event.window.windowID == thisScreen->screenID ){
 			thisScreen->inputHandlingBare( event, world, loopEnd );
@@ -213,6 +226,9 @@ void graphInterface::inputHandling( bool& loopEnd, bool& loopContinue, bool& sto
 	}
 		
 }
+
+
+/*
 
 void graphInterface::inputHandling( bool& loopEnd, bool& loopContinue, bool& stopFlag, moveReplayScanMode& moveReplayScan ){
 // handle the input events
@@ -295,5 +311,7 @@ void graphInterface::inputHandling( bool& loopEnd, bool& loopContinue, bool& sto
 //	if( keyboardState[SDL_SCANCODE_KP_8] ) moveReplayScan = REPLAY_MOVE_UP;
 		
 }
+
+*/
 
 #endif

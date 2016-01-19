@@ -1,5 +1,5 @@
 
-class appModeReplay : public appModeTipMol {
+class appModeReplay : public appModeTipMol, public InputHandler {
 // replay mode where no data is calculated but rather existing data is replayed
 
 	public:
@@ -14,11 +14,19 @@ class appModeReplay : public appModeTipMol {
 	int* molOfInterest = NULL;
 	int numMolOfInterest = 0;
 
+
+	moveReplayScanMode moveReplayScan;
+
+	bool withRotations = false;
+
+
+	// function
+
 	appModeReplay(){};
 	appModeReplay( int numOfMoleculeInstances_, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics_, abstractTip* tip, flagList *flags, scanSpecification* scan, fileManager* outputFiles, int* molOfInterest_, int numMolOfInterest_, fileManager* outputPositMolFiles_ = NULL, fileManager* outputRotatMolFiles_ = NULL );
 	
 	void loop( int n );
-
+	virtual void handleInput( const SDL_Event& event ); // overides InputHandler::handleInput
 };
 
 
@@ -28,11 +36,47 @@ appModeReplay::appModeReplay( int numOfMoleculeInstances_, fileManager* molecule
 // constructor
 : scan( scan ), outputFiles( outputFiles_ ), numMolOfInterest( numMolOfInterest_ ), outputPositMolFiles( outputPositMolFiles_ ), outputRotatMolFiles( outputRotatMolFiles_ ), appModeTipMol( numOfMoleculeInstances_, moleculeFiles, typeList, geometryFile, surf, graphics_, tip, flags )
 {
+
+	printf( " DEBUG : appModeReplay::appModeReplay \n" );
 	molOfInterest = new int[numMolOfInterest];
 	for( int i = 0; i < numMolOfInterest; i++ ) molOfInterest[i] = molOfInterest_[i];
-	
-	if( abstractAppMode::graphics != NULL ) abstractAppMode::graphics->drawBox( scan );
+
+	if( graphics != NULL ){ 
+		printf( " DEBUG : setting graphics \n" );
+		graphics->drawBox( scan );
+		graphics->userInputHandler = this;
+	}else{
+		printf( " DEBUG : graphics is NULL \n" );
+	}
 }
+
+
+
+void appModeReplay::handleInput( const SDL_Event& event ){
+	printf( " inside appModeReplay::handleInput \n " );
+	switch( event.type ){
+		case SDL_KEYDOWN:
+			switch( event.key.keysym.sym ){
+				case SDLK_KP_4:
+					moveReplayScan = REPLAY_MOVE_LEFT;
+					break;
+				case SDLK_KP_6:
+					moveReplayScan = REPLAY_MOVE_RIGHT;
+					break;
+				case SDLK_KP_2:
+					moveReplayScan = REPLAY_MOVE_DOWN;
+					break;
+				case SDLK_KP_8:
+					moveReplayScan = REPLAY_MOVE_UP;
+					break;
+				case SDLK_KP_5:
+					moveReplayScan = REPLAY_MOVE_OUT;
+					break;
+			};
+			break;
+	};
+};
+
 
 void appModeReplay::loop( int n ){
 // replay loop
@@ -79,31 +123,38 @@ void appModeReplay::loop( int n ){
 	vectorDataManager* positMolDataList = NULL;
 	quaterDataManager* rotatMolDataList = NULL;
 	if( showMolOfInterestMovement ){
-		positMolDataList = new vectorDataManager( numMolOfInterest, total, metadataList, "mol. trajectories" );
-		rotatMolDataList = new quaterDataManager( numMolOfInterest, total, metadataList, "mol. rotations" );
+		printf( "DEBUG 1 \n" );
+		positMolDataList = new vectorDataManager( numMolOfInterest, total, metadataList, "mol. trajectories" ); printf( "mol. trajectories DONE \n" );
+		if( withRotations  ) rotatMolDataList = new quaterDataManager( numMolOfInterest, total, metadataList, "mol. rotations" );    printf( "mol. rotations    DONE \n" );
 	}
 
 	// generation of z-step sequence
 	scalarDataWrapper* zSteps = new scalarDataWrapper( scan->zdim, metadataList, "z-steps" );
 	scan->createZSamplingSequenceLoc( zSteps );
 	
+	printf( "DEBUG 2 \n" );
+
 	// import positDataList and rotatDataList
 	(*outputFiles)[0]->importDataFromFile( "appModeReplay::loop", positDataList );
 	(*outputFiles)[3]->importDataFromFile( "appModeReplay::loop", rotatDataList ); // 3 !!!
 
+	printf( "DEBUG 3 \n" );
+
 	// import trajectories and orientations of the molecule of interest
 	if( showMolOfInterestMovement ){
 		numOfStrings += 2*numMolOfInterest;	
-		outputPositMolFiles->importDataFromFiles( "appModeReplay::loop", positMolDataList );
-		outputRotatMolFiles->importDataFromFiles( "appModeReplay::loop", rotatMolDataList );
+		outputPositMolFiles->importDataFromFiles( "appModeReplay::loop", positMolDataList );  printf( "mol. trajectories DONE \n" );
+		if( withRotations  ){ outputRotatMolFiles->importDataFromFiles( "appModeReplay::loop", rotatMolDataList );  printf( "mol. rotations    DONE \n" ); }
 	}	
 	
+	printf( "DEBUG 4 \n" );
+
 	moveReplayScanMode moveReplayScan = REPLAY_MOVE_NONE;
 	
 	int xind = 0;
 	int yind = scan->ydim - 1;
 	int zind = 0;
-	int ind = 0;
+	int ind  = 0;
 
 	xpos = scan->xoffset;
 	ypos = yind*scan->ystep + scan->yoffset;
@@ -147,13 +198,12 @@ void appModeReplay::loop( int n ){
 		if( showMolOfInterestMovement ){
 			for( int i = 0; i < numMolOfInterest; i++ ){
 				abstractAppMode::world->pos[molOfInterest[i]].set( (*(*positMolDataList)[i])[ind] );
-				abstractAppMode::world->rot[molOfInterest[i]].set( (*(*rotatMolDataList)[i])[ind] );
+				if( withRotations  ) abstractAppMode::world->rot[molOfInterest[i]].set( (*(*rotatMolDataList)[i])[ind] );
 			}
 		}
 
 		// handle input events
-		if( abstractAppMode::graphics != NULL )
-			abstractAppMode::graphics->inputHandling( loopEnd, loopContinue, stopFlag, moveReplayScan );
+		if( abstractAppMode::graphics != NULL ) abstractAppMode::graphics->inputHandling( loopEnd, loopContinue, stopFlag );
 		if( loopEnd ) break;
 		if( loopContinue ){
 			zpos -= (*zSteps)[zind];
@@ -251,7 +301,7 @@ void appModeReplay::loop( int n ){
 	
 	if( showMolOfInterestMovement ){
 		delete positMolDataList;
-		delete rotatMolDataList;		
+		if( withRotations  ) delete rotatMolDataList;		
 	}
 
 }
