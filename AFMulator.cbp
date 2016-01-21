@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="AFMulator" />
+		<Option makefile_is_custom="1" />
+		<Option execution_dir="/home/prokop/git/AFMulator_RigidBody/Build/" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="CMake Files/;CMake Files/cmake_utils/;CMake Files/src/;" />
+		<Build>
+			<Target title="all">
+				<Option type="4" />
+				<Option compiler="gcc" />
+				<MakeCommands>
+					<Build command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 all' />
+					<CompileFile command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;' />
+					<Clean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 clean' />
+					<DistClean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 clean' />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -s -f $makefile $target" />
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option type="4" />
+				<Option compiler="gcc" />
+				<MakeCommands>
+					<Build command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 rebuild_cache' />
+					<CompileFile command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;' />
+					<Clean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 clean' />
+					<DistClean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/Makefile&quot;  VERBOSE=1 clean' />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -s -f $makefile $target" />
+				</MakeCommands>
+			</Target>
+			<Target title="AFMulator.x">
+				<Option output="/home/prokop/git/AFMulator_RigidBody/Build/src/AFMulator.x" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="WorkDir" />
+				<Option object_output="./" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="/home/prokop/git/AFMulator_RigidBody/src" />
+					<Add directory="/usr/include" />
+					<Add directory="/usr/include/c++/5" />
+					<Add directory="/usr/include/c++/5/backward" />
+					<Add directory="/usr/include/x86_64-linux-gnu" />
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5" />
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include" />
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+					<Add directory="/usr/local/include" />
+					<Add directory="/usr/local/include/SDL2" />
+				</Compiler>
+				<MakeCommands>
+					<Build command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 AFMulator.x' />
+					<CompileFile command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;' />
+					<Clean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 clean' />
+					<DistClean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 clean' />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -s -f $makefile $target" />
+				</MakeCommands>
+			</Target>
+			<Target title="AFMulator.x/fast">
+				<Option output="/home/prokop/git/AFMulator_RigidBody/Build/src/AFMulator.x" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="/home/prokop/git/AFMulator_RigidBody" />
+				<Option object_output="./" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="/home/prokop/git/AFMulator_RigidBody/src" />
+					<Add directory="/usr/include" />
+					<Add directory="/usr/include/c++/5" />
+					<Add directory="/usr/include/c++/5/backward" />
+					<Add directory="/usr/include/x86_64-linux-gnu" />
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5" />
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include" />
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+					<Add directory="/usr/local/include" />
+					<Add directory="/usr/local/include/SDL2" />
+				</Compiler>
+				<MakeCommands>
+					<Build command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 AFMulator.x/fast' />
+					<CompileFile command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;' />
+					<Clean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 clean' />
+					<DistClean command='/usr/bin/make -f &quot;/home/prokop/git/AFMulator_RigidBody/Build/src/Makefile&quot;  VERBOSE=1 clean' />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -s -f $makefile $target" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="../CMakeLists.txt">
+			<Option virtualFolder="CMake Files/" />
+		</Unit>
+		<Unit filename="../cmake_utils/FindSDL2.cmake">
+			<Option virtualFolder="CMake Files/cmake_utils/" />
+		</Unit>
+		<Unit filename="../cmake_utils/FindSDL2_ttf.cmake">
+			<Option virtualFolder="CMake Files/cmake_utils/" />
+		</Unit>
+		<Unit filename="../src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files/src/" />
+		</Unit>
+		<Unit filename="../src/main.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
