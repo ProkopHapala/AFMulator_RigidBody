@@ -103,6 +103,7 @@
 		<Extensions>
 			<code_completion />
 			<envvars />
+			<lib_finder disable_auto="1" />
 			<debugger />
 		</Extensions>
 	</Project>
