@@ -1,0 +1,11 @@
+# atomTypesFile - atom elements with characteristics
+inputs/atomTypes.ini
+
+# scanningParams - scanning parameters
+inputs/scan.ini
+
+# moleculeParams - molecule parameters
+inputs/molecules.ini
+
+# tipParams - tip parameters
+inputs/tip.ini

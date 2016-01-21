@@ -1,0 +1,2 @@
+rm -rf *.o program.x  
+g++ -std=c++11 -Og -g -w src/main.cpp -o program.x -lm -lSDL2 -lSDL2_ttf -lGL -lGLU 
