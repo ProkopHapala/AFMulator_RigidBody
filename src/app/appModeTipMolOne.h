@@ -3,17 +3,16 @@
 // only a single z-direction scanning
 class appModeTipMolOne : public appModeTipMol, public InputHandler {
 	public:
+	bool   tipMoved        = false;
+	bool   optimizingFlag  = true;
+	double xpos = 0, ypos = 0, zpos = 20;
+	int    convergStep      = 0;
 
 	appModeTipMolOne(){};
 	appModeTipMolOne( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics, abstractTip* tip, flagList *flags );
 
-	bool restart = true;
-	double xpos = 0, ypos = 0, zpos = 20;
-
 	void loop( int n );
 	virtual void handleInput( const SDL_Event& event ); // overides InputHandler::handleInput
-
-
 };
 
 
@@ -34,24 +33,21 @@ void appModeTipMolOne::handleInput( const SDL_Event& event ){
 	switch( event.type ){
 		case SDL_KEYDOWN:
 			switch( event.key.keysym.sym ){
-				case SDLK_KP_4: xpos-=dstep; restart=true; break;
-				case SDLK_KP_6: xpos+=dstep; restart=true; break;
-				case SDLK_KP_2: ypos-=dstep; restart=true; break;
-				case SDLK_KP_8: ypos+=dstep; restart=true; break;
-				case SDLK_KP_9: zpos+=dstep; restart=true; break;
-				case SDLK_KP_3: zpos-=dstep; restart=true; break;
+				case SDLK_KP_4: xpos-=dstep; tipMoved=true; break;
+				case SDLK_KP_6: xpos+=dstep; tipMoved=true; break;
+				case SDLK_KP_2: ypos-=dstep; tipMoved=true; break;
+				case SDLK_KP_8: ypos+=dstep; tipMoved=true; break;
+				case SDLK_KP_9: zpos+=dstep; tipMoved=true; break;
+				case SDLK_KP_3: zpos-=dstep; tipMoved=true; break;
 			};
-			if( restart ) printf( " tip(x,y,z) %3.3f %3.3f %3.3f \n ", xpos, ypos, zpos );
+			if( tipMoved ) printf( " tip(x,y,z) %3.3f %3.3f %3.3f \n ", xpos, ypos, zpos );
 			break;
 	};
 };
 
 void appModeTipMolOne::loop( int n ){
 // one z-axis scanning loop
-
-	bool   optimizingFlag  = true;
 	bool   loopEnd         = false, loopContinue, stopFlag = false;
-	int    convergStep      = 0;
 	int    convergStepLimit = n;
 	double pixelDataListItem;
 
@@ -62,6 +58,7 @@ void appModeTipMolOne::loop( int n ){
 
 	world->tip->setPosition( xpos, ypos, zpos );
 	world->adjustMolToTip();
+	world->optSteps = 0;
 
 	for( int iframe = 0; iframe < n; iframe++ ){
 
@@ -71,26 +68,33 @@ void appModeTipMolOne::loop( int n ){
 			if( loopEnd ) break;
 		}
 
-		if( restart ){
+		if( tipMoved ){
 			world->tip->setPosition( xpos, ypos, zpos );
 			//world->adjustMolToTip();
-			optimizingFlag = true;
-			restart        = false;
+			if(  optimizingFlag ){
+				printf( " user-tip-move interupted relaxation at step %i  ( dt %e damping %e ) \n", world->optSteps, ((OptimizerFIRE*)world->optimizer)->dt_var, ((OptimizerFIRE*)world->optimizer)->damp_var  );
+			}else{
+				optimizingFlag = true;
+			}
+			world->optSteps = 0;
+			tipMoved    = false;
 		};
 
 		// update world
 		if( world->getSysEvol() ){
-			if( graphics != NULL && world->tip != NULL ){
-				graphics->thisScreen->mouseSetAuxPoint( world );
+			if( ( graphics != NULL ) && ( world->tip != NULL ) ){   graphics->thisScreen->mouseSetAuxPoint( world );  }
+			if( optimizingFlag ){
+				world->update( optimizingFlag, pixelDataListItem );
+				if( !optimizingFlag ){
+					printf( " converged in %i iterations ( dt %e damping %e ) \n", world->optSteps, ((OptimizerFIRE*)world->optimizer)->dt_var, ((OptimizerFIRE*)world->optimizer)->damp_var  );
+				}
 			}
-			world->update( optimizingFlag, pixelDataListItem );
 //			printf( "loopSingleRelaxationPerm: step %i\n", convergStep );
 			convergStep++;
 		}
 
 		if( convergStep > convergStepLimit ){
-			if( !suppressOutput )
-				printf( "appModeTipMolOne::loop: Relaxation does not converge. Skipped.\n" );
+			if( !suppressOutput ){ printf( "appModeTipMolOne::loop: Relaxation does not converge. Skipped.\n" ); }
 			break;
 		}
 
