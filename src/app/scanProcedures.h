@@ -5,25 +5,21 @@
 // SCANNING PROCEDURES
 
 enum scanningType {			// which scanning mode to use
-
 	SCANNING_NONE,
 	SCANNING_NONE_VIEW,
 	SCANNING_REPLAY,
 	SCANNING_ONE,
-	SCANNING_RASTER
-
+	SCANNING_RASTER,
+	SCANNING_SCRIPT
 };
 
 enum zSamplingMode {			// how to choose successive distances of a tip while being approach to the sample
-
 	Z_SAMPLE_EQUIDIST,
 	Z_SAMPLE_LINEAR,
 	Z_SAMPLE_QUAD
-
 };
 
 enum moveReplayScanMode {		// where to move the scanning tip in the replay mode (SCANNING_REPLAY)
-
 	REPLAY_MOVE_NONE,
 	REPLAY_MOVE_LEFT,
 	REPLAY_MOVE_RIGHT,
@@ -31,7 +27,6 @@ enum moveReplayScanMode {		// where to move the scanning tip in the replay mode 
 	REPLAY_MOVE_UP,
 	REPLAY_MOVE_IN,
 	REPLAY_MOVE_OUT
-
 };
 
 void linspace( int n, double x0, double dx, double * xs ){
