@@ -12,9 +12,8 @@
 //class Screen; // forward declaration
 
 class PhysicalSystem {
-// a class encompassing all relevant molecules and pertaining methods
-
 	public:
+
 	int nmols;					// number of molecules in a system
 	MoleculeType **molecules = NULL;		// molecules themselves
 	Vec3d  *pos = NULL, *vpos = NULL, *fpos = NULL;	// positions of molecules, velocities and forces
@@ -41,7 +40,10 @@ class PhysicalSystem {
 	int perFrame = 10;
 	int optSteps = 0;
 
-	private:
+	double fmaxConv = 1e-4;
+	double fmax;
+
+	Vec3d fTip;
 
 	// picked atom and molecule indices and flags
 
@@ -51,7 +53,7 @@ class PhysicalSystem {
 	int	molToDrawPrev = -1;			// which molecule was chosen previously
 
 	bool	atomHold = false;			// atomHold == true iff the mouse is holding an atom
-	int	atomToDraw = -1, molToDraw = -1;	// indices of atom and corresponding molecule which are to be picked by a mouse click
+	int	    atomToDraw = -1, molToDraw = -1;	// indices of atom and corresponding molecule which are to be picked by a mouse click
 	bool	sysEvol = true;				// sysEvol == true iff the system undergoes evolution/relaxation
 
 	bool	molHold  = false;			// molHold == true iff the mouse is holding a molecule
@@ -65,9 +67,11 @@ class PhysicalSystem {
 	int molToDrawNormal = -1;
 	int* lines = NULL;
 
-	public:
 
-	// FUNCTIONS
+
+
+
+	// ============= FUNCTIONS
 
 	// initialization
 
@@ -91,7 +95,8 @@ class PhysicalSystem {
 	void forceFromPoints( Vec3d point, int mol, Vec3d force );
 
 	void cleanPointForce( int npoints, Vec3d* forces );
-	void rigidOptStep( double& pixelDataListItem );
+	//void rigidOptStep( double& pixelDataListItem );
+	void rigidOptStep( );
 	void forcesMolecules( bool surfaceForcesActive = true );
 	void forcesTip( Vec3d& vec );
 	void forcesTipAux( Vec3d centre, Vec3d Mvec, double mult, Vec3d force, GLuint id );
@@ -100,7 +105,8 @@ class PhysicalSystem {
 
 	void draw();
 	void drawAuxPoint();
-	void update( bool& optimizingFlag, double& pixelDataListItem );
+	//void update( bool& optimizingFlag, double& pixelDataListItem );
+	void update( bool& optimizingFlag );
 	void setSysEvol( bool sysEvol_ );
 	bool getSysEvol();
 	void mouseSetAuxPoint( float mouseA, float mouseB, Vec3d scCamRight, Vec3d scCamUp, Vec3d scCamDir );
@@ -525,7 +531,8 @@ void PhysicalSystem::cleanPointForce( int npoints, Vec3d * forces ){
 
 }
 
-void PhysicalSystem::rigidOptStep( double& pixelDataListItem ){
+//void PhysicalSystem::rigidOptStep( double& pixelDataListItem ){
+void PhysicalSystem::rigidOptStep( ){
 // one step of the relaxation
 
 	// initialize everything associated with forces to zero
@@ -535,14 +542,14 @@ void PhysicalSystem::rigidOptStep( double& pixelDataListItem ){
 		rot[i].normalize();			// keep quaternion normalized, otherwise unstable !!!
 	}
 
-	Vec3d vec;
+	//Vec3d vec;
 
 	// calculate forces
 	forcesMolecules();
 	if( tip != NULL ){
-		forcesTip( vec );
+		forcesTip( fTip );
 	}
-	pixelDataListItem = vec.z;
+	//pixelDataListItem = fTip.z;
 
 	// in frot[i] left only its part which is perpendicular to rot[i]
 	for( int i = 0; i < nmols; i++ ){
@@ -733,17 +740,18 @@ void PhysicalSystem::draw(){
 
 }
 
-void PhysicalSystem::update( bool& optimizingFlag, double& pixelDataListItem ){
+//void PhysicalSystem::update( bool& optimizingFlag, double& pixelDataListItem ){
+void PhysicalSystem::update( bool& optimizingFlag ){
 // update the relaxation
 	if( optimizingFlag ){
-		double fmax;
 		//int perFrame = 1;
 		for( int i = 0; i < perFrame; i++ ){
 			optSteps ++;
-			rigidOptStep( pixelDataListItem );
+			//rigidOptStep( pixelDataListItem );
+			rigidOptStep( );
 			fmax = optimizer->getFmaxAbs();
 //			printf( "fmax = %f\n", fmax );
-			if( fmax < 1e-4 ){
+			if( fmax < fmaxConv ){
 				optimizingFlag = false;
 //				printf( "Converged in %i !!!, Fmax = %f \n", optimizer->stepsDone, fmax );
 				break;

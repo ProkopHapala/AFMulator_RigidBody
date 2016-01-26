@@ -84,7 +84,8 @@ void appModeTipMolOne::loop( int n ){
 		if( world->getSysEvol() ){
 			if( ( graphics != NULL ) && ( world->tip != NULL ) ){   graphics->thisScreen->mouseSetAuxPoint( world );  }
 			if( optimizingFlag ){
-				world->update( optimizingFlag, pixelDataListItem );
+				world->update( optimizingFlag );
+				pixelDataListItem = world->fTip.z;
 				if( !optimizingFlag ){
 					printf( " converged in %i iterations ( dt %e damping %e ) \n", world->optSteps, ((OptimizerFIRE*)world->optimizer)->dt_var, ((OptimizerFIRE*)world->optimizer)->damp_var  );
 				}
@@ -98,7 +99,7 @@ void appModeTipMolOne::loop( int n ){
 			break;
 		}
 
-		if( graphics != NULL && (delay || stopFlag) ) SDL_Delay( 10 );
+		//if( graphics != NULL && (delay || stopFlag) ) SDL_Delay( 10 );
 
 	}
 }

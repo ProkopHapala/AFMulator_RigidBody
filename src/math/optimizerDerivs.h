@@ -35,7 +35,7 @@ class OptimizerDerivs{
 			force[i]=0;
 		}
 	};
-	
+
 	~OptimizerDerivs(){
 //		delete [] pos;
 //		delete [] vel;
@@ -45,7 +45,7 @@ class OptimizerDerivs{
 	double getFmaxAbs( ){
 		double fmax = 0;
 		for(int i=0; i<n; i++){
-			double fi = fabs( force[i] );  
+			double fi = fabs( force[i] );
 			fmax=(fi>fmax)?fi:fmax;
 		}
 		return fmax;
@@ -95,13 +95,13 @@ class OptimizerFIRE : public OptimizerDerivs {
 	public:
 
 		int minLastNeg  = 5;
-		double finc     = 1.1; 
+		double finc     = 1.1;
 		double fdec     = 0.5;
 		double falpha   = 0.98;
 		double kickStart = 0.0;
 
-		int    lastNeg  = 0; 
-		double dt_var   = dt; 
+		int    lastNeg  = 0;
+		double dt_var   = dt;
 		double damp_var = damping;
 
 
@@ -110,28 +110,28 @@ class OptimizerFIRE : public OptimizerDerivs {
 	};
 
 	virtual void move(){
-	
+
 		double ff=0,vv=0,vf=0;
 		for(int i=0; i<n; i++){
 			double fi = force[i];
 			double vi = vel[i];
-			
+
 //			printf( "vel[%i] = %lf\n", i, vel[i] );
 //			printf( "force[%i] = %lf\n", i, force[i] );
-			
+
 			ff += fi*fi;
 			vv += vi*vi;
 			vf += vi*fi;
 		}
 
 //		printf( "ff = %lf,\tvv = %lf,\tvf = %lf\n", ff, vv, vf );
-		
+
 		if( ff < 1e-15 ){
 			printf( "OptimizerFIRE::move: No forces.\n" );
 			stepsDone++;
-			return;	
+			return;
 		}
-		
+
 		if( vf < 0.0 ){
 			dt_var   = dt_var * fdec;
 		  	damp_var = damping;
@@ -140,7 +140,7 @@ class OptimizerFIRE : public OptimizerDerivs {
 			for(int i=0; i<n; i++){ vel[i] = kickStart*dt_var*force[i]; }
 			//for(int i=0; i<n; i++){ vel[i] = dmax*force[i]*sqrt(1/ff)/dt_var; }
 		}else{
-			
+
 			//double cf  =     damp_var * sqrt(vv/(ff+1e-8));
 			double cf     =     damp_var * sqrt(vv/ff);
 			double cv     = 1 - damp_var;
@@ -156,16 +156,16 @@ class OptimizerFIRE : public OptimizerDerivs {
 			}
 			lastNeg++;
 		}
-		
+
 //		printf( "dt_var = %lf\n", dt_var );
-		
+
 		for ( int i=0; i<n; i++ ){
 //			printf( "vel[%i] = %lf\n", i, vel[i] );
 //			printf( "pos[%i] = %lf\n", i, pos[i] );
 
 			vel[i] += dt_var*force[i];
 			pos[i] += dt_var*vel[i];
-			
+
 		}
 
 		//printf( " %i f v vf  %f %f %f   dt damp  %f %f \n",  stepsDone,   sqrt(ff), sqrt(vv), vf/sqrt(vv*ff),   dt_var, damp_var  );
@@ -178,58 +178,6 @@ class OptimizerFIRE : public OptimizerDerivs {
 	};
 
 };
-
-/*
-class OptimizerFIRE : public OptimizerDerivs {
-	public:
-		double dt       = 0.1;
-		double damping  = 0.1;
-		double finc     = 1.1; 
-		double fdec     = 0.5;
-		double falpha   = 0.99;
-		double dt_var   = dt; 
-		double damp_var = damping;
-
-	OptimizerFIRE(int n_, double* pos_, double* vel_, double* force_, FunctionDerivatives func_  ):
-	OptimizerDerivs  ( n_, pos_, vel_, force_, func_   ){
-	};
-
-	virtual void move(){
-		double ff=0,vv=0,vf=0;
-		for(int i=0; i<n; i++){
-			double fi = force[i];
-			double vi = vel[i];
-			ff += fi*fi;
-			vv += vi*vi;
-			vf += vi*fi;
-		}
-		if( vf < 0 ){
-			for(int i=0; i<n; i++){ vel[i] = 0.0d; }
-			dt_var   = dt_var * fdec;
-		  	damp_var = damping;
-		}else{
-			//double cf  =     damp_var * sqrt(vv/(ff+1e-8));
-			double cf  =     damp_var * sqrt(vv/ff);
-			double cv  = 1 - damp_var;
-			for(int i=0; i<n; i++){
-				vel[i]      = cv * vel[i]  + cf * force[i];
-			}
-			dt_var     = fmin( dt_var * finc, dt );
-			damp_var  *= damp_var * falpha;
-		}
-		for ( int i=0; i<n; i++ ){
-			vel[i] += dt_var*force[i];
-			pos[i] += dt_var*vel[i];
-		}
-		stepsDone++;
-	}
-
-	virtual void step(){
-		func( n , pos, force );
-		move();
-	};
-};
-*/
 
 #endif
 
