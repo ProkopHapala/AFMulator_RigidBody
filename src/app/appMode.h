@@ -12,20 +12,20 @@ class abstractAppMode {
 	bool delay = false;
 	bool suppressOutput = false;
 
-	PhysicalSystem* world = NULL;
+	PhysicalSystemEditor* world = NULL;
 	int numOfMoleculeInstances = 0;	// number of molecule instances, many molecules may be of the same instance
-					// an instance defines specific atom positions within a given molecule 
+					// an instance defines specific atom positions within a given molecule
 
 	MoleculeType** molp = NULL;	// molecules
 					// a molecule defines orientation and position of the molecule in the global system
 					// two molecules might be of the same molecule instance, in which case a modification of one molecule affects accordingly the other molecule
 					// two molecules may have the same topology, i.e. the type, but their atoms might be of slightly different mutual positions, i.e. different instances
-					
+
 					// 2 basic modes: each molecule has its own instance -- in such a case modification of a given molecule does not affects other molecules
 					// 		  several molecules share the same instance -- in such a case modifications are also shared, but in this case less memory is used
 
-	
-	
+
+
 	graphInterface* graphics = NULL;
 
 	virtual void loop( int n ){};
@@ -37,7 +37,7 @@ class abstractAppMode {
 };
 
 
-// ================= abstractAppMode procedures ================= 
+// ================= abstractAppMode procedures =================
 
 abstractAppMode::~abstractAppMode(){
 // destructor

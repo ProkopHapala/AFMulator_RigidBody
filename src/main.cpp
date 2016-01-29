@@ -47,7 +47,7 @@
 
 #include "math/optimizerDerivs.h"
 #include "core/physicalSystem.h"
-//#include "core/PhysicalSystemEditor.h"
+#include "core/PhysicalSystemEditor.h"
 
 #include "graphics/alphabet.h"
 #include "graphics/button.h"

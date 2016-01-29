@@ -18,8 +18,7 @@ class probeMolecule {  // probe molecule
 	int atom = -1;
 	int mol  = -1;
 	std::string fileName;
-	// ==== functions
-
+	// ==== construnctor & destructor
 	probeMolecule(){};
 	probeMolecule( int mol_, int atom_, Vec3d pos_, Quat4d rot_, Vec3d centreMol_, std::string fileName_ );
 };
@@ -35,29 +34,26 @@ class abstractTip {  // parent class for all tips
 	Vec3d pos;
 	probeMolecule* probeMol = NULL;
 	// ==== functions
-	virtual void renderTip( Vec3d pos1, double radius ){};
-	virtual void drawTip(){};
-	void setPosition( Vec3d pos_ ){
-		pos.set( pos_ );
-	};
-	void setPosition( double xpos, double ypos, double zpos ){
-		pos.set( xpos, ypos, zpos );
-	};
+	virtual void  renderTip( Vec3d pos1, double radius ){};
+	virtual void  drawTip(){};
 	virtual Vec3d getForceRad( Vec3d sysCoordAtom, Vec3d& vec ){};
-	virtual void getForceOrient( Quat4d rot_, Vec3d& force2, Vec3d& force3, Vec3d& vec2, Vec3d& vec3 ){};
-	virtual void setTipParameters( char* filename ){};
-	virtual void printTip(){};
-
+	virtual void  getForceOrient( Quat4d rot_, Vec3d& force2, Vec3d& force3, Vec3d& vec2, Vec3d& vec3 ){};
+	virtual void  setTipParameters( char* filename ){};
+	virtual void  printTip(){};
+	// ==== inline functions
+	void setPosition( Vec3d pos_                            ){	pos.set( pos_ );	         };
+	void setPosition( double xpos, double ypos, double zpos ){	pos.set( xpos, ypos, zpos ); };
 };
 
 class tipOnePoint : public abstractTip {   // tip represented by a fixed point
 	public:
 	Vec3d xaxis, yaxis, zaxis;
 	// ==== functions
+	void printTip();
+	// ==== construnctor & destructor
 	tipOnePoint();
 	tipOnePoint( Vec3d zaxis );
 	tipOnePoint( Vec3d xaxis, Vec3d yaxis, Vec3d zaxis );
-	void printTip();
 };
 
 class tipOnePointMol : public tipOnePoint { // tip with a probe molecule
@@ -73,13 +69,13 @@ class tipOnePointMol : public tipOnePoint { // tip with a probe molecule
 	Vec3d getForceRad( Vec3d sysCoordAtom, Vec3d& vec );
 	void setTipParams( const char* filename );
 	void setTipParameters( char* filename );
-	tipOnePointMol( char* filename );
-	tipOnePointMol( char* filename, Vec3d zaxis );
-	tipOnePointMol( char* filename, Vec3d xaxis, Vec3d yaxis, Vec3d zaxis );
 	void printTip();
 	void renderTip( Vec3d pos1, double radius );
 	void drawTip();
-
+	// ==== construnctor & destructor
+	tipOnePointMol( char* filename );
+	tipOnePointMol( char* filename, Vec3d zaxis );
+	tipOnePointMol( char* filename, Vec3d xaxis, Vec3d yaxis, Vec3d zaxis );
 };
 
 // ===================== tipOnePoint procedures =====================
