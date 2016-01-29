@@ -20,7 +20,7 @@ class appModeFileScript : public appModeTipMol {
 	int  convergStepLimit = 0;
 	int* molOfInterest    = NULL;
 	int  numMolOfInterest = 0;
-	bool	saveMolOfInterestMovement = false;
+	bool saveMolOfInterestMovement = false;
 
 	// loop variables
 	int  ind,numOfNoncovergCases;
@@ -107,48 +107,13 @@ appModeFileScript::appModeFileScript( int numOfMoleculeInstances, fileManager* m
 	//if( graphics != NULL ) graphics->drawBox( scan );
 }
 
-
-/*
-
-bool loadFromFile( char const* filename ){
-		FILE* pFile = fopen( filename, "r" );
-		char str[400];
-		int count;
-		if( pFile ){
-			printf( "MoleculeType::loadFromFile: \t %s.\n", filename );
-			readLineComment( pFile, str );
-	  		sscanf( str, " %i", &natoms );
-			allocateAtoms( natoms );
-			for( int i = 0; i < natoms; i++ ){
-				double q = 0;
-				readLineComment( pFile, str );
-				count = sscanf( str, " %i %lf %lf %lf %lf", &atypes[i], &xyzs[i].x, &xyzs[i].y, &xyzs[i].z, &q );
-				if( count > 4 ){
-					Qs[i] = q;
-				} else {
-					printf( "MoleculeType::loadFromFile: Atom no. %i has no charge specified. Default value used instead.\n", i );
-					Qs[i] = 0;
-				}
-				atypes[i]--;
-				//printf( " %i %f %f %f %f %f %i \n", atypes[i], xyzs[i].x, xyzs[i].y, xyzs[i].z, Qs[i], q, nw );
-			}
-	  		fclose( pFile );
-	  		return true;
-  		} else {
-			printf( "MoleculeType::loadFromFile: File %s cannot be loaded. Default value used instead.\n", filename );
-			// DODELAT IMPLICITNI HODNOTY KDYZTAK
-  			return false;
-  		}
-	}
-
-*/
-
 void appModeFileScript::command_tipPos( char * line ){
 	double x,y,z;
 	sscanf( line, "%lf %lf %lf", &x, &y, &z );
 	if( graphics != NULL ) printf( "   relaxing tip pos %f %f %f\n", x, y, z );
 	bool converged = convergeTipPos( x, y, z );
-	fprintf( pOut, "%f %f %f %f %f %f \n", x, y, z, world->fTip.x, world->fTip.y, world->fTip.z );
+	Vec3d outpos; outpos.set( world->tip->probeMol->pos );
+	fprintf( pOut, "%f %f %f    %f %f %f    %f %f %f \n", x, y, z, world->fTip.x, world->fTip.y, world->fTip.z, outpos.x, outpos.y, outpos.z );
 }
 
 void appModeFileScript::command_startStroke( char * line ){
@@ -180,42 +145,11 @@ void appModeFileScript::loop( int n ){
 		total++;
 		char* rest = strchr( line, ';' );
 		int cmdlen = (int)(rest-line);
-		if       ( 0==strncmp( "set_tip_pos", line, cmdlen ) ){ command_tipPos( rest+1 ); }
-		else if  ( 0==strncmp( "start_stroke", line, cmdlen ) ){ command_startStroke( rest+1 ); }
+		if      ( 0==strncmp( "set_tip_pos",  line, cmdlen ) ){ command_tipPos( rest+1 ); }
+		else if ( 0==strncmp( "start_stroke", line, cmdlen ) ){ command_startStroke( rest+1 ); }
 	}
 	fclose( pScript );
 	fclose( pOut );
-
-
-/*
-
-	ind                 = 0;
-	numOfNoncovergCases = 0;
-	loopEnd             = false;
-	printf( "\n=== CALCULATION LOOP INITIATED ===\n" );
-	for( int yind = scan->ydim - 1; yind >= 0; yind-- ){
-	//for( int yind = 0; yind < scan->ydim ; yind++ ){
-		//double ypos = yind*scan->ystep + scan->yoffset;
-		double ypos = scan->ys[yind];
-		for( int xind = 0; xind < scan->xdim; xind++ ){
-			//double xpos = xind*scan->xstep + scan->xoffset;
-			double xpos = scan->xs[xind];
-			world->tip->setPosition( xpos, ypos, scan->zs[0] );
-			world->adjustMolToTip();
-			if( !suppressOutput ){	printf( "relaxing z-line (ix,iy) %5i %5i \n", xind, yind ); }
-			for( int zind = 0; zind < scan->zdim ; zind++ ){
-				double zpos = scan->zs[zind];
-
-				bool converged = convergeTipPos( xpos, ypos, zpos ); // most important part
-
-			} // zind
-			if( loopEnd ) break;
-			resetup();
-		} // xind
-		if( loopEnd ) break;
-	} // yind
-
-*/
 
 	printf( "\n=== SCANNING SUMMARY ===\n" );
 	printf( "appModeRaster::loop: There were %i cases out of %i (%i) when the relaxation did not converge.\n", numOfNoncovergCases, ind + 1, total );

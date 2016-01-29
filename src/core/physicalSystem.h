@@ -14,11 +14,11 @@
 class PhysicalSystem {
 	public:
 
-	int nmols;					// number of molecules in a system
-	MoleculeType **molecules = NULL;		// molecules themselves
+	int nmols;										// number of molecules in a system
+	MoleculeType **molecules  = NULL;				// molecules themselves
 	Vec3d  *pos = NULL, *vpos = NULL, *fpos = NULL;	// positions of molecules, velocities and forces
 	Quat4d *rot = NULL, *vrot = NULL, *frot = NULL;	// rotations of molecules, velocities and forces
-	bool* notRigid = NULL;				// whether given molecule is subject to relaxation
+	bool* notRigid = NULL;							// whether given molecule is subject to relaxation
 	int nptmp;
 	Vec3d  *Tps_i = NULL, *Tps_j = NULL;
 	Vec3d  *fs_i  = NULL, *fs_j  = NULL;
@@ -27,8 +27,8 @@ class PhysicalSystem {
 	double *C6s = NULL, *C12s = NULL;		// coefficients for the Lennard-Jones potential
 
 	OptimizerDerivs* optimizer = NULL;
-	abstractTip* tip = NULL;
-	abstractSurf* surf = NULL;
+	abstractTip*     tip       = NULL;
+	abstractSurf*    surf      = NULL;
 
 	// picked atom and molecule indices
 
@@ -497,7 +497,6 @@ void PhysicalSystem::resetGeometry( char const* filename, Vec3d posProbe, Quat4d
 // ============== RELAXATION OPTIMIZATION ==============
 
 void PhysicalSystem::forceFromPoints( int npoints, Vec3d * points, Vec3d * forces, const Quat4d& q, Vec3d& fp, Quat4d& fq ){
-
 	for( int i = 0; i < npoints; i++ ){
 		q .addForceFromPoint( points[i], forces[i], fq );
 		fp.add( forces[i] );
@@ -505,25 +504,21 @@ void PhysicalSystem::forceFromPoints( int npoints, Vec3d * points, Vec3d * force
 }
 
 void PhysicalSystem::forceFromPoints( Vec3d point, Vec3d force, const Quat4d& q, Vec3d& fp, Quat4d& fq ){
-
 	q .addForceFromPoint( point, force, fq );
 	fp.add( force );
 }
 
 void PhysicalSystem::forceFromPoints( Vec3d point, int mol, Vec3d force ){
-
 	rot[mol].addForceFromPoint( point, force, frot[mol] );
 	fpos[mol].add( force );
 }
 
 void PhysicalSystem::forceFromPoints( int mol, int atom, Vec3d force ){
-
 	rot[mol].addForceFromPoint( molecules[mol]->xyzs[atom], force, frot[mol] );
 	fpos[mol].add( force );
 }
 
-void PhysicalSystem::cleanPointForce( int npoints, Vec3d * forces ){
-// set forces to zero
+void PhysicalSystem::cleanPointForce( int npoints, Vec3d * forces ){ // set forces to zero
 
 	for( int i = 0; i < npoints; i++ ){
 		forces[i].set( 0.0 );
@@ -534,54 +529,44 @@ void PhysicalSystem::cleanPointForce( int npoints, Vec3d * forces ){
 //void PhysicalSystem::rigidOptStep( double& pixelDataListItem ){
 void PhysicalSystem::rigidOptStep( ){
 // one step of the relaxation
-
 	// initialize everything associated with forces to zero
 	for( int i = 0; i < nmols; i++ ){
 		fpos[i].set( 0.0 );			// set all "forces positions" to zero
 		frot[i].set( 0.0, 0.0, 0.0, 0.0 );	// set all "forces rotations" to zero
 		rot[i].normalize();			// keep quaternion normalized, otherwise unstable !!!
 	}
-
 	//Vec3d vec;
-
 	// calculate forces
 	forcesMolecules();
 	if( tip != NULL ){
 		forcesTip( fTip );
 	}
 	//pixelDataListItem = fTip.z;
-
 	// in frot[i] left only its part which is perpendicular to rot[i]
 	for( int i = 0; i < nmols; i++ ){
 		double qfq = rot[i].dot( frot[i] );	// projection of frot[i] onto rot[i]
 		frot[i].add_mul( rot[i], -qfq );	// from frot[i] subtract its part parallel to rot[i]
 	}
-
 	// update positions and velocities of molecules
 	optimizer->move();
 }
 
 void PhysicalSystem::forcesMolecules( bool surfaceForcesActive ){
 // calculate forces, no auxiliary point is taken into account
-
 	// for all molecules...
 	for( int i = 0; i < nmols; i++ ){
-
 		// i-th molecule
 		MoleculeType* moli = molecules[i];				// in moli store i-th molecule
 		int npi = moli->natoms;						// npi is a number of atoms in i-th molecule
 		moleculeToSystemCoords( pos[i], rot[i], npi, moli->xyzs, Tps_i );	// to Tps_i store system coordinates of i-th molecule's atom positions
 		cleanPointForce( npi, fs_i );					// initialize fs_i to zeros
-
 		// ...consider all preceding molecules
 		for( int j = 0; j < i; j++ ){
-
 			// j-th molecule
 			MoleculeType* molj = molecules[j];				// in molj store j-th molecule
 			int npj = molj->natoms;						// npj is a number of atoms in j-th molecule
 			moleculeToSystemCoords( pos[j], rot[j], npj, molj->xyzs, Tps_j );	// to Tps_j store system coordinates of j-th molecule's atom positions
 			cleanPointForce( npj, fs_j );					// initialize fs_j to zeros
-
 			// calculate forces -- Lennard-Jones plus electrostatic
 			// forces are stored in fs_i and fs_j for i-th and j-th molecule, respectively
 			interMolForceLJE(
@@ -589,16 +574,13 @@ void PhysicalSystem::forcesMolecules( bool surfaceForcesActive ){
 				npj, molj->atypes, molj->Qs, Tps_j, fs_j,
 				atypeList->ntypes, C6s, C12s
 			);
-
 			// update orientation frot and forces fpos for j-th molecule
 			if( notRigid[j] ) forceFromPoints( npj, molj->xyzs, fs_j, rot[j], fpos[j], frot[j] );
 		}
-
 		// calculate force between the i-th molecule and the surface
 		if( surfaceForcesActive ){
 			surf->forceMolSurfSurf( npi, Tps_i, fs_i ); // !!!
 		}
-
 		// update orientation rot and forces fpos for i-th molecule
 		if( notRigid[i] ) forceFromPoints( npi, moli->xyzs, fs_i, rot[i], fpos[i], frot[i] );
 	}
@@ -606,9 +588,7 @@ void PhysicalSystem::forcesMolecules( bool surfaceForcesActive ){
 }
 
 void PhysicalSystem::forcesTipAux( Vec3d centre, Vec3d Mvec, double mult, Vec3d force, GLuint id ){
-
 	Vec3d Mcaux, vecaux, vecaux2;
-
 	Mcaux.set( centre ); // !!!
 	Mcaux.add_mul( Mvec, mult ); // !!!
 	vecaux = systemToMoleculeCoords( tip->probeMol->mol, Mcaux );
@@ -620,35 +600,25 @@ void PhysicalSystem::forcesTipAux( Vec3d centre, Vec3d Mvec, double mult, Vec3d 
 
 void PhysicalSystem::forcesTip( Vec3d& vec ){
 // calculate forces between the tip and a single atom atomToDraw_ in molecule molToDraw_, tip_sys are system coordinates of the tip
-
 	double mult = 1;
 	Vec3d sysCoordAtom;
 	Vec3d centre, force;
-
 	molToDrawNormal = tip->probeMol->mol;
-
 	sysCoordAtom = systemCoordsOfAtom( tip->probeMol->mol, tip->probeMol->atom );
 	centre = moleculeToSystemCoords( tip->probeMol->mol, tip->probeMol->centreMol );
-
 	// forces to auxiliary point
 	force = tip->getForceRad( sysCoordAtom, vec );
 	forceFromPoints( tip->probeMol->mol, tip->probeMol->atom, force );
-
 	// draw axes
 	Vec3d vec_zero;
 	vec_zero.set( 0, 0, 0 );
 	drawCoordAxesRot( centre, force, vec_zero, vec_zero, normID[1], 5 );
-
 //	printf( "tip->tip->probeMol->mol = %i, tip->probeMol->atom = %i\n", tip->tip->probeMol->mol, tip->probeMol->atom );
-
 	if( molecules[tip->probeMol->mol]->natoms > 1 ){
-
 		Vec3d vec2, vec3, force2, force3;
 		tip->getForceOrient( rot[tip->probeMol->mol], force2, force3, vec2, vec3 );
-
 		forcesTipAux( centre, vec2,  mult, force2, 0 );
 		forcesTipAux( centre, vec2, -mult, force2, 0 );
-
 		forcesTipAux( centre, vec3,  mult, force3, 0 );
 		forcesTipAux( centre, vec3, -mult, force3, 0 );
 	}
@@ -658,14 +628,11 @@ void PhysicalSystem::forcesTip( Vec3d& vec ){
 
 void PhysicalSystem::draw(){
 // draw the system
-
 	Uint32 atomColor;
 	Mat3d rotmat;
 	float glMat[4*4];
-
 	// for all molecules in the system...
 	for( int i = 0; i < nmols; i++ ){
-
 		// if the molecule is to be drawn...
 		if( molecules[i]->viewlist > 0 ){
 
@@ -706,9 +673,7 @@ void PhysicalSystem::draw(){
 					molecules[molToDrawPrev]->drawAtom( pickedAtoms[j], 5, atomscaleEmph, atomColor );
 				}
 			}
-
 			glPopMatrix();
-
 //			// draw the normal, if it exists
 			glDisable( GL_LIGHTING );
 //			printf( "molToDrawNormal = %i\n", molToDrawNormal );
@@ -722,9 +687,7 @@ void PhysicalSystem::draw(){
 					}
 				}
 			}
-
 			glEnable( GL_LIGHTING );
-
 		}
 	}
 
@@ -733,11 +696,9 @@ void PhysicalSystem::draw(){
 		Vec3d pos1;
 		pos1 = moleculeToSystemCoords( tip->probeMol->mol, molecules[tip->probeMol->mol]->xyzs[tip->probeMol->atom] );
 		double rad = 0.5*(molecules[tip->probeMol->mol]->typeList->vdwRs[molecules[tip->probeMol->mol]->atypes[tip->probeMol->atom]]);
-
 		tip->renderTip( pos1, rad );
 		tip->drawTip();
 	}
-
 }
 
 //void PhysicalSystem::update( bool& optimizingFlag, double& pixelDataListItem ){
@@ -790,29 +751,22 @@ void PhysicalSystem::mouseSetAuxPoint( float mouseA, float mouseB, Vec3d scCamRi
 	}
 }
 
-void PhysicalSystem::chectTipMolAtom(){
-// set a permanent auxiliary point
-
+void PhysicalSystem::chectTipMolAtom(){   // set a permanent auxiliary point
 	if( tip == NULL || tip->probeMol == NULL ){
 		printf( "chectTipMolAtom: Invalid tip. Halt.\n" );
 		return;
 	}
-
 	if( tip->probeMol->mol >= nmols ){
 		printf( "chectTipMolAtom: Probe molecule index too big.\n" );
 		tip->probeMol->mol = nmols - 1;
 	}
-
 	if( tip->probeMol->atom >= molecules[tip->probeMol->mol]->natoms ){
 		printf( "chectTipMolAtom: Probe atom index too big.\n" );
 		tip->probeMol->atom = molecules[tip->probeMol->mol]->natoms - 1;
 	}
-
 }
 
-void PhysicalSystem::adjustMolToTip(){
-// move aux_molToDraw_orig so as its aux_atomToDraw_orig-th atom lies in auxiliary point aux_force_point
-
+void PhysicalSystem::adjustMolToTip(){   // move aux_molToDraw_orig so as its aux_atomToDraw_orig-th atom lies in auxiliary point aux_force_point
 	if( tip == NULL || tip->probeMol == NULL ){
 		printf( "adjustMolToTip: No tip. Halt.\n" );
 		return;
@@ -825,74 +779,52 @@ void PhysicalSystem::adjustMolToTip(){
 		printf( "adjustMolToTip: Invalid atom.\n" );
 		return;
 	}
-
 	Vec3d atomPos, vec_diff;
 	atomPos = moleculeToSystemCoords( tip->probeMol->mol, molecules[tip->probeMol->mol]->xyzs[tip->probeMol->atom] );
 	vec_diff.set_sub( tip->pos, atomPos );
 	pos[tip->probeMol->mol].add( vec_diff );
-
 }
 
 // ============== ATOM PICKING AND MOVING ==============
 
-void PhysicalSystem::resetOneAtomMove(){
-// go one step backward, i.e. reset the last moving of an atom
-
+void PhysicalSystem::resetOneAtomMove(){   // go one step backward, i.e. reset the last moving of an atom
 	if( atomToDrawOrigPos != NULL && molToDraw != -1 && atomToDraw != -1 ){
 		(molecules[molToDraw]->xyzs[atomToDraw]).set( *atomToDrawOrigPos );
 		molecules[molToDraw]->redrawMol();
 	}
 }
 
-bool PhysicalSystem::moveAtom( Vec3d systemCoords ){
-// if a picked atom is moved, set the new position of the atom
-
-	if( !atomHold ){
-		return false;
-	}
-
+bool PhysicalSystem::moveAtom( Vec3d systemCoords ){    // if a picked atom is moved, set the new position of the atom
+	if( !atomHold ){return false;}
 	Vec3d atomCoords;
 	atomCoords = systemToMoleculeCoords( molToDraw, systemCoords );
-
 	molecules[molToDraw]->xyzs[atomToDraw].set( atomCoords );
 	molecules[molToDraw]->redrawMol();
 	return true;
 }
 
-bool PhysicalSystem::moveMolecule( Vec3d systemCoords ){
-// if a picked molecule is moved, set the new position of the molecule
-
-	if( !molHold ){
-		return false;
-	}
-
+bool PhysicalSystem::moveMolecule( Vec3d systemCoords ){  // if a picked molecule is moved, set the new position of the molecule
+	if( !molHold ){ return false; }
 	Vec3d molCoords;
-
 	pos[molToDraw].set( molCoords );
 	molecules[molToDraw]->redrawMol();
 	return true;
 }
 
-bool PhysicalSystem::rayPickAtomSet( const Vec3d& ray0, const Vec3d& hRay, bool emphasized ){
-// if a mouse is clicked over the atom, choose this atom
-
+bool PhysicalSystem::rayPickAtomSet( const Vec3d& ray0, const Vec3d& hRay, bool emphasized ){  // if a mouse is clicked over the atom, choose this atom
 	int atomToDrawAux = -1; // in order to keep drawing a ball when no atom is selected, but mouse clicked
 	bool found = false;
 	Vec3d* xyzs_aux;
 	float atomscaleLoc;
 	float distMin = INFINITY, dist;
-
 	// loop over all molecules in the system
 	for( int i = 0; i < nmols; i++ ){
-
 		// in xyzs_aux store positions of atoms in the molecule expressed in the system coordinates
 		xyzs_aux = new Vec3d[molecules[i]->natoms];
 		moleculeToSystemCoords( pos[i], rot[i], molecules[i]->natoms, molecules[i]->xyzs, xyzs_aux );
-
 		// find an atom over which the mouse is clicked
 //		atomToDrawAux = molecules[i]->rayPickAtom_sphereAlt( ray0, hRay, xyzs_aux, atomscaleLoc, dist );
 		atomToDrawAux = molecules[i]->rayPickAtom_sphereAlt( ray0, hRay, xyzs_aux, atomscale, atomscaleEmph, pickedAtomCounter, pickedAtoms, dist );
-
 		// if the mouse is clicked over an actual atom...
 		if( dist < distMin ){
 			distMin = dist;
@@ -900,11 +832,9 @@ bool PhysicalSystem::rayPickAtomSet( const Vec3d& ray0, const Vec3d& hRay, bool 
 			atomToDraw = atomToDrawAux;
 			molToDraw = i;
 		}
-
 		// atom positions in system coords are no longer needed
 		delete [] xyzs_aux;
 	}
-
 	// if no atom has been chosen by mouse...
 	if( distMin == INFINITY ){
 		molToDraw  = -1;
@@ -919,59 +849,37 @@ bool PhysicalSystem::rayPickAtomSet( const Vec3d& ray0, const Vec3d& hRay, bool 
 		// set flag
 		found = true;
 	}
-
 	printf( "rayPickAtomSet: Picked atom no. %i in molecule no. %i.\n", atomToDraw, molToDraw );
-
 	return found;
 }
 
-int PhysicalSystem::getMolToDraw(){
-// returns an index of a chosen molecule
-
+int PhysicalSystem::getMolToDraw(){  // returns an index of a chosen molecule
 	return molToDraw;
-
 }
 
-int PhysicalSystem::getAtomToDraw(){
-// returns an index of a chosen atom
-
+int PhysicalSystem::getAtomToDraw(){  // returns an index of a chosen atom
 	return atomToDraw;
-
 }
 
-void PhysicalSystem::setAtomHold( bool atomHold_ ){
-// set atomHold
-
+void PhysicalSystem::setAtomHold( bool atomHold_ ){  // set atomHold
 	atomHold = atomHold_;
-
 }
 
-bool PhysicalSystem::getAtomHold(){
-// return atomHold
-
+bool PhysicalSystem::getAtomHold(){  // return atomHold
 	return atomHold;
-
 }
 
-void PhysicalSystem::setMolHold( bool molHold_ ){
-// set molHold
-
+void PhysicalSystem::setMolHold( bool molHold_ ){  // set molHold
 	molHold = molHold_;
-
 }
 
-bool PhysicalSystem::getMolHold(){
-// return molHold
-
+bool PhysicalSystem::getMolHold(){  // return molHold
 	return molHold;
-
 }
 
 // ============== SELECTION OF ATOMS ==============
 
-bool PhysicalSystem::addPickedAtom(){
-// if an atom is chosen, add it to the selection
-
+bool PhysicalSystem::addPickedAtom(){  // if an atom is chosen, add it to the selection
 	if( pickedAtomCounter == 0 ){
 		molToDrawPrev = molToDraw;
 		pickedAtoms = new int[numPickedAtoms];
