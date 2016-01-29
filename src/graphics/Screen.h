@@ -615,14 +615,6 @@ void Screen::handleKeyDown( SDL_Event event, PhysicalSystemEditor* world ){  // 
 		case SDLK_LEFT:			setAxisView( AXIS_Y );	break;
 		case SDLK_RIGHT:		setAxisView( AXIS_X );	break;
 		case SDLK_DOWN:			setAxisView( AXIS_W );	break;
-
-//		// following used in replay mode
-//		case SDLK_KP_4://		replayMoveLeft();//			break;
-//		case SDLK_KP_6://		replayMoveRight();//		break;
-//		case SDLK_KP_2://		replayMoveDown();//			break;
-//		case SDLK_KP_8://		replayMoveUp();//			break;
-//		case SDLK_e://			world->exportData();//		break;
-
 	}
 }
 

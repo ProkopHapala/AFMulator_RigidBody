@@ -5,12 +5,6 @@
 #include <string.h>
 #include <stdio.h>
 
-//#include "tipProcedures.h"
-
-#define PI 3.1415926535
-
-//class Screen; // forward declaration
-
 class PhysicalSystem {
 	public:
 
@@ -40,55 +34,49 @@ class PhysicalSystem {
 
 	// ============= FUNCTIONS
 
-	// initialization
-
+	// setup
 	void initParams();
 	void initTPoints();
 
-	PhysicalSystem(){};
-	PhysicalSystem( char const* filename, int numOfMoleculeInstances, MoleculeType** molTypeList, bool raw, abstractTip* tip_, abstractSurf* surf_ );
-	PhysicalSystem( fileWrapper* geometryFile, int numOfMoleculeInstances, MoleculeType** molTypeList, abstractTip* tip_, abstractSurf* surf_ );
-	void makeFF();
+	void resetGeometry         ( char const* filename, Vec3d posProbe, Quat4d rotProbe, bool raw );
+	void resetGeometry         ( fileWrapper* file, Vec3d posProbe, Quat4d rotProbe );
 
-	// destruction and reset
-
-	virtual ~PhysicalSystem();
-	void resetGeometry( char const* filename, Vec3d posProbe, Quat4d rotProbe, bool raw );
-	void resetGeometry( fileWrapper* file, Vec3d posProbe, Quat4d rotProbe );
-
-
-	double distBetweenTwoAtoms( int indmol, int inda, int indb );
-	Vec3d systemToMoleculeCoords( int mol, Vec3d systemCoords );
-	Vec3d moleculeToSystemCoords( int mol, Vec3d systemCoords );
-	void moleculeToSystemCoords( const Vec3d& pos, const Quat4d& rot, int npoints, Vec3d* points, Vec3d* Tpoints );
-	Vec3d systemCoordsOfAtom( int mol, int atom );
+	// geometry utilities
+	double distBetweenTwoAtoms   ( int indmol, int inda, int indb );
+	Vec3d  systemToMoleculeCoords( int mol, Vec3d systemCoords );
+	Vec3d  moleculeToSystemCoords( int mol, Vec3d systemCoords );
+	void   moleculeToSystemCoords( const Vec3d& pos, const Quat4d& rot, int npoints, Vec3d* points, Vec3d* Tpoints );
+	Vec3d  systemCoordsOfAtom    ( int mol, int atom );
+	void   adjustMolToTip();
 
 	// relaxation optimization
-
 	void forceFromPoints( int npoints, Vec3d* points, Vec3d* forces,  const Quat4d& q,  Vec3d& fp, Quat4d& fq );
-	void forceFromPoints( Vec3d point, Vec3d force, const Quat4d& q, Vec3d& fp, Quat4d& fq );
-	void forceFromPoints( int mol, int atom, Vec3d force );
-	void forceFromPoints( Vec3d point, int mol, Vec3d force );
-
-	void cleanPointForce( int npoints, Vec3d* forces );
-	//void rigidOptStep( double& pixelDataListItem );
-	void rigidOptStep( );
+	void forceFromPoints( const Vec3d& point, const Vec3d& force, const Quat4d& q, Vec3d& fp, Quat4d& fq );
+	void forceFromPoints( const Vec3d& point, const Vec3d& force, int mol );
+	void forceFromPoints( int mol, int atom,  const Vec3d& force );
 	void forcesMolecules( bool surfaceForcesActive = true );
 	void forcesTip( Vec3d& vec );
 	void forcesTipAux( Vec3d centre, Vec3d Mvec, double mult, Vec3d force, GLuint id );
+	void cleanPointForce( int npoints, Vec3d* forces );
+	//void rigidOptStep( double& pixelDataListItem );
+	void rigidOptStep( );
+	void update( bool& optimizingFlag );
+
+	//void setSysEvol( bool sysEvol_ );
+	//bool getSysEvol();
 
 	// additional actions
-
-	void exportData();
-	void update( bool& optimizingFlag );
-	void setSysEvol( bool sysEvol_ );
-	bool getSysEvol();
-	void adjustMolToTip();
+	void exportData     ();
 	void chectTipMolAtom();
 
-	// drawing and updating
+	// ==== inline functions
+	void makeFF(){ makeLJparams( atypeList->ntypes, atypeList->vdwRs, atypeList->vdwEs, C6s, C12s ); }
 
-	// atom picking and moving
+	// ==== construnctor & destructor
+	PhysicalSystem(){};
+	PhysicalSystem( char const* filename, int numOfMoleculeInstances, MoleculeType** molTypeList, bool raw, abstractTip* tip_, abstractSurf* surf_ );
+	PhysicalSystem( fileWrapper* geometryFile, int numOfMoleculeInstances, MoleculeType** molTypeList, abstractTip* tip_, abstractSurf* surf_ );
+	virtual ~PhysicalSystem();
 
 };
 
@@ -110,9 +98,7 @@ PhysicalSystem::~PhysicalSystem(){ // destructor
 
 // ============== INITIALIZATION ==============
 
-void PhysicalSystem::initParams(){
-// optimization parameters
-
+void PhysicalSystem::initParams(){  // optimization parameters
 	int nparams = (3+4)*nmols;
 	optimizer   = new OptimizerFIRE( nparams, new double[nparams], new double[nparams], new double[nparams], NULL );
 	//optimizer   = new OptimizerDerivs( nparams, new double[nparams], new double[nparams], new double[nparams], NULL );
@@ -125,17 +111,12 @@ void PhysicalSystem::initParams(){
 	rot   = (Quat4d*)&optimizer->pos[irot];
 	vrot  = (Quat4d*)&optimizer->vel[irot];
 	frot  = (Quat4d*)&optimizer->force[irot];
-
 }
 
-void PhysicalSystem::initTPoints(){
-// point temporary
-
+void PhysicalSystem::initTPoints(){  // point temporary
 	nptmp = 0;
 	for( int i = 0; i < nmols; i++ ){
-		if( molecules[i]->natoms > nptmp ){
-			nptmp = molecules[i]->natoms;
-		}
+		if( molecules[i]->natoms > nptmp ){	nptmp = molecules[i]->natoms; }
 	}
 	Tps_i = new Vec3d[nptmp];
 	Tps_j = new Vec3d[nptmp];
@@ -145,7 +126,6 @@ void PhysicalSystem::initTPoints(){
 }
 
 PhysicalSystem::PhysicalSystem( char const* filename, int numOfMoleculeInstances, MoleculeType** molTypeList, bool raw, abstractTip* tip_, abstractSurf* surf_ ){
-
 	FILE* pFile = fopen( filename, "r" );
 	if( pFile == NULL ){
 		printf( "PhysicalSystem: File %s cannot be opened. Default physical system created.\n", filename );
@@ -155,30 +135,22 @@ PhysicalSystem::PhysicalSystem( char const* filename, int numOfMoleculeInstances
 		surf		= NULL;
 	} else {
 		printf( "PhysicalSystem:\t\tLoading physical system from\t%s.\n", filename );
-
 		int itype, count, notRigidAux, nmolsAux;
 		Mat3d M;
 		char str[600];
 		bool probeMoleculePresent = true;
-
 		if( !tip_->probeMol != NULL ) probeMoleculePresent = false;
-
 		readLineComment( pFile, str );
 		count = sscanf( str, " %i", &nmolsAux );
 		( probeMoleculePresent ) ? nmols = nmolsAux + 1 : nmols = nmolsAux; // extra molecule is the probe molecule
 		printf( "PhysicalSystem:\t\tNumber of molecules: nmols = %i \n", nmols );
-
 		molecules = new MoleculeType*[nmols];
 		notRigid = new bool[nmols];
 		initParams();
-
 		// molTypeList is a list of (numOfMoleculeInstances) lists
-
-		CHECK(3)
-
+		//CHECK(3)
 		for( int i = 0; i < nmolsAux; i++ ){
 			readLineComment( pFile, str );
-
 			if( raw ){
 				count = sscanf( str, " %i	%lf %lf %lf	%lf %lf %lf %lf	%i", \
 						&itype,	&pos[i].x, &pos[i].y, &pos[i].z,	&rot[i].x, &rot[i].y, &rot[i].z, &rot[i].w,	&notRigidAux );
@@ -193,16 +165,13 @@ PhysicalSystem::PhysicalSystem( char const* filename, int numOfMoleculeInstances
 
 				if( count < 11 ) notRigidAux = true;
 			}
-
 			notRigid[i] = notRigidAux; // not used notRigid[i] in sscanf directly since in that case Valgrind issues an error
 			if( itype - 1 > numOfMoleculeInstances ){
 				printf( "PhysicalSystem: Too little molecule instances. Set to the maximum possible value. \n" );
 				itype = numOfMoleculeInstances;
 			}
 			molecules[i] = molTypeList[itype - 1];
-
 		}
-
 		// probe molecule
 		if( probeMoleculePresent ){
 			molecules[nmols - 1] = molTypeList[numOfMoleculeInstances];
@@ -210,40 +179,23 @@ PhysicalSystem::PhysicalSystem( char const* filename, int numOfMoleculeInstances
 			rot[nmols - 1].set( tip_->probeMol->rot );
 			notRigid[nmols - 1] = true;
 		}
-
 		fclose( pFile );
-
 		tip = tip_;
 		surf = surf_;
-
-		CHECK(5)
-
+		//CHECK(5)
 		if( tip != NULL ) tip->printTip();
 //		surf->printSurf();
-
-		CHECK(4)
-
+		//CHECK(4)
 		initTPoints();
 		makeFF();
-
 	}
-
-}
-
-void PhysicalSystem::makeFF(){
-
-	makeLJparams( atypeList->ntypes, atypeList->vdwRs, atypeList->vdwEs, C6s, C12s );
-
 }
 
 // ============== DESTRUCTION AND RESET ==============
 
-
-
 void PhysicalSystem::resetGeometry( fileWrapper* file, Vec3d posProbe, Quat4d rotProbe ){
 // resets positions and orientation of molecules in the system, input file is the same as is used in the constructor
 // assumes there is a probe molecule in the system
-
 	if( !file->openRead() ){
 		printf( "resetGeometry: File %s cannot be opened. Default geometry used instead.\n", file->getFileName() );
 		nmols		= 0;
@@ -252,16 +204,12 @@ void PhysicalSystem::resetGeometry( fileWrapper* file, Vec3d posProbe, Quat4d ro
 		surf		= NULL;
 	} else {
 		printf( "resetGeometry: Reseting geometry based on values from %s.\n", file->getFileName() );
-
 		int aux, aux2, count;
 		Mat3d M;
 		char str[400];
-
 		file->readLineToString( str );
-
 		count = sscanf( str, " %i", &aux );
 		initParams();
-
 		for( int i = 0; i < nmols - 1; i++ ){
 			file->readLineToString( str );
 			if( file->isRaw() ){
@@ -275,11 +223,9 @@ void PhysicalSystem::resetGeometry( fileWrapper* file, Vec3d posProbe, Quat4d ro
 				rot[i].fromMatrix( M );
 			}
 		}
-
 		// probe molecule
 		pos[nmols - 1].set( posProbe );
 		rot[nmols - 1].set( rotProbe );
-
 		file->close();
 	}
 }
@@ -287,7 +233,6 @@ void PhysicalSystem::resetGeometry( fileWrapper* file, Vec3d posProbe, Quat4d ro
 void PhysicalSystem::resetGeometry( char const* filename, Vec3d posProbe, Quat4d rotProbe, bool raw ){
 // resets positions and orientation of molecules in the system, input file is the same as is used in the constructor
 // assumes there is a probe molecule in the system
-
 	FILE* pFile = fopen( filename, "r" );
 	if( pFile == NULL ){
 		printf( "resetGeometry: File %s cannot be opened. Default geometry used instead.\n", filename );
@@ -297,18 +242,14 @@ void PhysicalSystem::resetGeometry( char const* filename, Vec3d posProbe, Quat4d
 		surf		= NULL;
 	} else {
 //		printf( "resetGeometry: Reseting geometry based on values from %s.\n", filename );
-
 		int aux, aux2, count;
 		Mat3d M;
 		char str[400];
-
 		readLineComment( pFile, str );
 		count = sscanf( str, " %i", &aux );
 		initParams();
-
 		for( int i = 0; i < nmols - 1; i++ ){
 			readLineComment( pFile, str );
-
 			if( raw ){
 				count = sscanf( str, "%i	%lf %lf %lf	%lf %lf %lf %lf	%i", &aux,	&pos[i].x, &pos[i].y, &pos[i].z,	&rot[i].x, &rot[i].y, &rot[i].z, &rot[i].w,	&aux2 );
 			} else {
@@ -320,45 +261,34 @@ void PhysicalSystem::resetGeometry( char const* filename, Vec3d posProbe, Quat4d
 				rot[i].fromMatrix( M );
 			}
 		}
-
 		// probe molecule
 		pos[nmols - 1].set( posProbe );
 		rot[nmols - 1].set( rotProbe );
-
 		fclose( pFile );
 	}
 }
 
 // ============== RELAXATION OPTIMIZATION ==============
 
-void PhysicalSystem::forceFromPoints( int npoints, Vec3d * points, Vec3d * forces, const Quat4d& q, Vec3d& fp, Quat4d& fq ){
-	for( int i = 0; i < npoints; i++ ){
-		q .addForceFromPoint( points[i], forces[i], fq );
-		fp.add( forces[i] );
+//void PhysicalSystem::update( bool& optimizingFlag, double& pixelDataListItem ){
+void PhysicalSystem::update( bool& optimizingFlag ){
+// update the relaxation
+	if( optimizingFlag ){
+		//int perFrame = 1;
+		for( int i = 0; i < perFrame; i++ ){
+			optSteps ++;
+			//rigidOptStep( pixelDataListItem );
+			rigidOptStep( );
+			fmax = optimizer->getFmaxAbs();
+//			printf( "fmax = %f\n", fmax );
+			if( fmax < fmaxConv ){
+				optimizingFlag = false;
+//				printf( "Converged in %i !!!, Fmax = %f \n", optimizer->stepsDone, fmax );
+				break;
+			}
+		}
+//		printf( " %i fmax %f\n",  optimizer->stepsDone, fmax );
 	}
-}
-
-void PhysicalSystem::forceFromPoints( Vec3d point, Vec3d force, const Quat4d& q, Vec3d& fp, Quat4d& fq ){
-	q .addForceFromPoint( point, force, fq );
-	fp.add( force );
-}
-
-void PhysicalSystem::forceFromPoints( Vec3d point, int mol, Vec3d force ){
-	rot[mol].addForceFromPoint( point, force, frot[mol] );
-	fpos[mol].add( force );
-}
-
-void PhysicalSystem::forceFromPoints( int mol, int atom, Vec3d force ){
-	rot[mol].addForceFromPoint( molecules[mol]->xyzs[atom], force, frot[mol] );
-	fpos[mol].add( force );
-}
-
-void PhysicalSystem::cleanPointForce( int npoints, Vec3d * forces ){ // set forces to zero
-
-	for( int i = 0; i < npoints; i++ ){
-		forces[i].set( 0.0 );
-	}
-
 }
 
 //void PhysicalSystem::rigidOptStep( double& pixelDataListItem ){
@@ -419,7 +349,6 @@ void PhysicalSystem::forcesMolecules( bool surfaceForcesActive ){
 		// update orientation rot and forces fpos for i-th molecule
 		if( notRigid[i] ) forceFromPoints( npi, moli->xyzs, fs_i, rot[i], fpos[i], frot[i] );
 	}
-
 }
 
 void PhysicalSystem::forcesTipAux( Vec3d centre, Vec3d Mvec, double mult, Vec3d force, GLuint id ){
@@ -429,8 +358,7 @@ void PhysicalSystem::forcesTipAux( Vec3d centre, Vec3d Mvec, double mult, Vec3d 
 	vecaux = systemToMoleculeCoords( tip->probeMol->mol, Mcaux );
 	vecaux2.set_mul( force, 1.0 / mult ); // !!!
 //	drawCoordAxesRot( Mcaux, vecaux2, vec_zero, vec_zero, id, 5 );
-	forceFromPoints( vecaux, tip->probeMol->mol, vecaux2 );
-
+	forceFromPoints( vecaux, vecaux2, tip->probeMol->mol );
 }
 
 void PhysicalSystem::forcesTip( Vec3d& vec ){
@@ -459,40 +387,42 @@ void PhysicalSystem::forcesTip( Vec3d& vec ){
 	}
 }
 
-// ============== DRAWING AND UPDATING ==============
-
-
-//void PhysicalSystem::update( bool& optimizingFlag, double& pixelDataListItem ){
-void PhysicalSystem::update( bool& optimizingFlag ){
-// update the relaxation
-	if( optimizingFlag ){
-		//int perFrame = 1;
-		for( int i = 0; i < perFrame; i++ ){
-			optSteps ++;
-			//rigidOptStep( pixelDataListItem );
-			rigidOptStep( );
-			fmax = optimizer->getFmaxAbs();
-//			printf( "fmax = %f\n", fmax );
-			if( fmax < fmaxConv ){
-				optimizingFlag = false;
-//				printf( "Converged in %i !!!, Fmax = %f \n", optimizer->stepsDone, fmax );
-				break;
-			}
-		}
-//		printf( " %i fmax %f\n",  optimizer->stepsDone, fmax );
+void PhysicalSystem::forceFromPoints( int npoints, Vec3d * points, Vec3d * forces, const Quat4d& q, Vec3d& fp, Quat4d& fq ){
+	for( int i = 0; i < npoints; i++ ){
+		q .addForceFromPoint( points[i], forces[i], fq );
+		fp.add( forces[i] );
 	}
 }
 
-void PhysicalSystem::setSysEvol( bool sysEvol_ ){	sysEvol = sysEvol_; } // fucking useless method
-bool PhysicalSystem::getSysEvol(                ){ return sysEvol;     } // other fucking useless method
+void PhysicalSystem::forceFromPoints( const Vec3d& point, const Vec3d& force, const Quat4d& q, Vec3d& fp, Quat4d& fq ){
+	q .addForceFromPoint( point, force, fq );
+	fp.add( force );
+}
+
+void PhysicalSystem::forceFromPoints( const Vec3d& point, const Vec3d& force, int mol ){
+	rot [mol].addForceFromPoint( point, force, frot[mol] );
+	fpos[mol].add( force );
+}
+
+void PhysicalSystem::forceFromPoints( int mol, int atom, const Vec3d& force ){
+	//rot [mol].addForceFromPoint( molecules[mol]->xyzs[atom], force, frot[mol] );
+	//fpos[mol].add( force );
+	forceFromPoints( molecules[mol]->xyzs[atom], force, mol );
+}
+
+void PhysicalSystem::cleanPointForce( int npoints, Vec3d * forces ){ // set forces to zero
+	for( int i = 0; i < npoints; i++ ){	forces[i].set( 0.0 ); }
+}
+
+//void PhysicalSystem::setSysEvol( bool sysEvol_ ){	sysEvol = sysEvol_; } // fucking useless method
+//bool PhysicalSystem::getSysEvol(               ){ return sysEvol;     } // other fucking useless method
 
 void PhysicalSystem::chectTipMolAtom(){   // set a permanent auxiliary point
 	if( tip == NULL || tip->probeMol == NULL ){
 		printf( "chectTipMolAtom: Invalid tip. Halt.\n" );
 		return;
 	}
-	if( tip->probeMol->mol >= nmols ){
-		printf( "chectTipMolAtom: Probe molecule index too big.\n" );
+	if( tip->probeMol->mol >= nmols ){	printf( "chectTipMolAtom: Probe molecule index too big.\n" );
 		tip->probeMol->mol = nmols - 1;
 	}
 	if( tip->probeMol->atom >= molecules[tip->probeMol->mol]->natoms ){
@@ -502,32 +432,14 @@ void PhysicalSystem::chectTipMolAtom(){   // set a permanent auxiliary point
 }
 
 void PhysicalSystem::adjustMolToTip(){   // move aux_molToDraw_orig so as its aux_atomToDraw_orig-th atom lies in auxiliary point aux_force_point
-	if( tip == NULL || tip->probeMol == NULL ){
-		printf( "adjustMolToTip: No tip. Halt.\n" );
-		return;
-	}
-	if( tip->probeMol->mol == -1 ){
-		printf( "adjustMolToTip: Invalid mol.\n" );
-		return;
-	}
-	if( tip->probeMol->atom == -1 ){
-		printf( "adjustMolToTip: Invalid atom.\n" );
-		return;
-	}
+	if( tip == NULL || tip->probeMol == NULL ){ printf( "adjustMolToTip: No tip. Halt.\n" ); return; }
+	if( tip->probeMol->mol  == -1            ){ printf( "adjustMolToTip: Invalid mol.\n"  ); return; }
+	if( tip->probeMol->atom == -1            ){	printf( "adjustMolToTip: Invalid atom.\n" ); return; }
 	Vec3d atomPos, vec_diff;
 	atomPos = moleculeToSystemCoords( tip->probeMol->mol, molecules[tip->probeMol->mol]->xyzs[tip->probeMol->atom] );
 	vec_diff.set_sub( tip->pos, atomPos );
 	pos[tip->probeMol->mol].add( vec_diff );
 }
-
-// ============== ATOM PICKING AND MOVING ==============
-
-
-
-
-
-
-// ============== SELECTION OF ATOMS ==============
 
 // return a distance between inda-th atom and indb-th atom of the indmol-th molecule
 double PhysicalSystem::distBetweenTwoAtoms( int indmol, int inda, int indb ){
@@ -537,26 +449,7 @@ double PhysicalSystem::distBetweenTwoAtoms( int indmol, int inda, int indb ){
 	return diff.norm();
 }
 
-
-// ============== ADDITIONAL ACTIONS ==============
-
-// export data about molecules to the file
-void PhysicalSystem::exportData(){
-	char filename[] = "exportedData.dat";
-	FILE* file = fopen( filename, "w" );
-	if( file == NULL ){
-		printf( "exportData: File cannot be opened. No data export.\n" );
-		return;
-	}
-	printf( "exportData: Data export into the file %s.", filename );
-	fprintf( file, "%i\n", nmols );
-	for( int i = 0; i < nmols; i++ ){
-		fprintf( file, "%i\t%lf %lf %lf\t", i + 1, pos[i].x, pos[i].y, pos[i].z );
-		fprintf( file, "%lf %lf %lf %lf\t", rot[i].x, rot[i].y, rot[i].z, rot[i].w );
-		fprintf( file, "%i\n", notRigid[i] );
-	}
-	fclose( file );
-}
+// ======== Molecule<->System coordinate transofrmation
 
 // takes vector of system coordinates and express the same point in a molecule coordinates corresponding to molecule mol
 Vec3d PhysicalSystem::systemToMoleculeCoords( int mol, Vec3d systemCoords ){
@@ -566,17 +459,6 @@ Vec3d PhysicalSystem::systemToMoleculeCoords( int mol, Vec3d systemCoords ){
 	molCoordsAux.set_sub( systemCoords, pos[mol] );
 	mat.dot_to( molCoordsAux, molCoords );
 	return molCoords;
-}
-
-// express molecule coordinates stored in molCoords into system coordinates which are returned
-// molCoords are coordinates in mol-th molecule coordinate system
-Vec3d PhysicalSystem::moleculeToSystemCoords( int mol, Vec3d molCoords ){
-	Mat3d mat;
-	Vec3d systemCoordsAux, systemCoords;
-	rot[mol].toMatrix( mat );
-	mat.dot_to_T( molCoords, systemCoordsAux );
-	systemCoords.set_add( pos[mol], systemCoordsAux );
-	return systemCoords;
 }
 
 // express molecule coordinates stored in molCoords into system coordinates which are returned
@@ -598,12 +480,35 @@ void PhysicalSystem::moleculeToSystemCoords( const Vec3d& pos, const Quat4d& rot
 	}
 }
 
+// express molecule coordinates stored in molCoords into system coordinates which are returned
+// molCoords are coordinates in mol-th molecule coordinate system
+Vec3d PhysicalSystem::moleculeToSystemCoords( int mol, Vec3d molCoords ){
+	Mat3d mat;
+	Vec3d systemCoordsAux, systemCoords;
+	rot[mol].toMatrix( mat );
+	mat.dot_to_T( molCoords, systemCoordsAux );
+	systemCoords.set_add( pos[mol], systemCoordsAux );
+	return systemCoords;
+}
 
+// ============== I/O Rutines ==============
 
-
-
-
-
-
+// export data about molecules to the file
+void PhysicalSystem::exportData(){
+	char filename[] = "exportedData.dat";
+	FILE* file = fopen( filename, "w" );
+	if( file == NULL ){
+		printf( "exportData: File cannot be opened. No data export.\n" );
+		return;
+	}
+	printf( "exportData: Data export into the file %s.", filename );
+	fprintf( file, "%i\n", nmols );
+	for( int i = 0; i < nmols; i++ ){
+		fprintf( file, "%i\t%lf %lf %lf\t", i + 1, pos[i].x, pos[i].y, pos[i].z );
+		fprintf( file, "%lf %lf %lf %lf\t", rot[i].x, rot[i].y, rot[i].z, rot[i].w );
+		fprintf( file, "%i\n", notRigid[i] );
+	}
+	fclose( file );
+}
 
 #endif

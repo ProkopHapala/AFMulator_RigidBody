@@ -45,29 +45,23 @@ void appModeTipMolOne::handleInput( const SDL_Event& event ){
 	};
 };
 
-void appModeTipMolOne::loop( int n ){
-// one z-axis scanning loop
+void appModeTipMolOne::loop( int n ){  // one z-axis scanning loop
 	bool   loopEnd         = false, loopContinue, stopFlag = false;
 	int    convergStepLimit = n;
 	double pixelDataListItem;
-
 	if( world == NULL ){
 		printf( "appModeTipMolOne::loop: No world exists. Halt.\n" );
 		return;
 	}
-
 	world->tip->setPosition( xpos, ypos, zpos );
 	world->adjustMolToTip();
 	world->optSteps = 0;
-
 	for( int iframe = 0; iframe < n; iframe++ ){
-
 		if( graphics != NULL ){
 			graphics->updateGraphics();
 			graphics->inputHandling( loopEnd, loopContinue, stopFlag );
 			if( loopEnd ) break;
 		}
-
 		if( tipMoved ){
 			world->tip->setPosition( xpos, ypos, zpos );
 			//world->adjustMolToTip();
@@ -78,10 +72,10 @@ void appModeTipMolOne::loop( int n ){
 			}
 			world->optSteps = 0;
 			tipMoved    = false;
-		};
-
+		}
 		// update world
-		if( world->getSysEvol() ){
+		//if( world->getSysEvol() ){
+		if( world->sysEvol ){
 			if( ( graphics != NULL ) && ( world->tip != NULL ) ){   graphics->thisScreen->mouseSetAuxPoint( world );  }
 			if( optimizingFlag ){
 				world->update( optimizingFlag );
@@ -93,13 +87,10 @@ void appModeTipMolOne::loop( int n ){
 //			printf( "loopSingleRelaxationPerm: step %i\n", convergStep );
 			convergStep++;
 		}
-
 		if( convergStep > convergStepLimit ){
 			if( !suppressOutput ){ printf( "appModeTipMolOne::loop: Relaxation does not converge. Skipped.\n" ); }
 			break;
 		}
-
 		//if( graphics != NULL && (delay || stopFlag) ) SDL_Delay( 10 );
-
 	}
 }
