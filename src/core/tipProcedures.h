@@ -13,8 +13,8 @@
 class probeMolecule {  // probe molecule
 	public:
 	Quat4d rot;
-	Vec3d  pos;
-	Vec3d  centreMol;
+	Vec3d  pos;          // position of anchor point
+	Vec3d  centreMol;    // position of molecule
 	int atom = -1;
 	int mol  = -1;
 	std::string fileName;
@@ -45,6 +45,11 @@ class abstractTip {  // parent class for all tips
 	void setPosition( double xpos, double ypos, double zpos ){	pos.set( xpos, ypos, zpos ); };
 };
 
+
+// ==============================
+//          tipOnePoint
+// ==============================
+
 class tipOnePoint : public abstractTip {   // tip represented by a fixed point
 	public:
 	Vec3d xaxis, yaxis, zaxis;
@@ -55,6 +60,25 @@ class tipOnePoint : public abstractTip {   // tip represented by a fixed point
 	tipOnePoint( Vec3d zaxis );
 	tipOnePoint( Vec3d xaxis, Vec3d yaxis, Vec3d zaxis );
 };
+
+tipOnePoint::tipOnePoint() // constructor
+: abstractTip(){}
+
+tipOnePoint::tipOnePoint( Vec3d xaxis, Vec3d yaxis, Vec3d zaxis ) // constructor
+: xaxis( xaxis ), yaxis( yaxis ), zaxis( zaxis ){}
+
+tipOnePoint::tipOnePoint( Vec3d zaxis ) // constructor
+: zaxis( zaxis ){}
+
+void tipOnePoint::printTip(){ // print parameters
+	printf( "xaxis = %lf %lf %lf\n", xaxis.x, xaxis.y, xaxis.z );
+	printf( "yaxis = %lf %lf %lf\n", yaxis.x, yaxis.y, yaxis.z );
+	printf( "zaxis = %lf %lf %lf\n", zaxis.x, zaxis.y, zaxis.z );
+}
+
+// ==============================
+//          tipOnePointMol
+// ==============================
 
 class tipOnePointMol : public tipOnePoint { // tip with a probe molecule
 	public:
@@ -77,25 +101,6 @@ class tipOnePointMol : public tipOnePoint { // tip with a probe molecule
 	tipOnePointMol( char* filename, Vec3d zaxis );
 	tipOnePointMol( char* filename, Vec3d xaxis, Vec3d yaxis, Vec3d zaxis );
 };
-
-// ===================== tipOnePoint procedures =====================
-
-tipOnePoint::tipOnePoint() // constructor
-: abstractTip(){}
-
-tipOnePoint::tipOnePoint( Vec3d xaxis, Vec3d yaxis, Vec3d zaxis ) // constructor
-: xaxis( xaxis ), yaxis( yaxis ), zaxis( zaxis ){}
-
-tipOnePoint::tipOnePoint( Vec3d zaxis ) // constructor
-: zaxis( zaxis ){}
-
-void tipOnePoint::printTip(){ // print parameters
-	printf( "xaxis = %lf %lf %lf\n", xaxis.x, xaxis.y, xaxis.z );
-	printf( "yaxis = %lf %lf %lf\n", yaxis.x, yaxis.y, yaxis.z );
-	printf( "zaxis = %lf %lf %lf\n", zaxis.x, zaxis.y, zaxis.z );
-}
-
-// ===================== tipOnePointMol procedures =====================
 
 tipOnePointMol::tipOnePointMol( char* filename ) // constructor
 : tipOnePoint(){
@@ -147,7 +152,8 @@ void tipOnePointMol::setTipParameters( char* filename ){  // sets parameters of 
 	}
 }
 
-void tipOnePointMol::getForceOrient( Quat4d rot_, Vec3d& force2, Vec3d& force3, Vec3d& vec2, Vec3d& vec3 ){  // return rotating force acting on a multi-atom molecule in an external homogeneous field
+// return rotating force acting on a multi-atom molecule in an external homogeneous field
+void tipOnePointMol::getForceOrient( Quat4d rot_, Vec3d& force2, Vec3d& force3, Vec3d& vec2, Vec3d& vec3 ){
 	Quat4d rotInit;
 	Mat3d M;
 	rotInit.setQmul( rotInitAux, rot_ ); // rot_ = rot[tip->getMol()]
@@ -163,7 +169,8 @@ void tipOnePointMol::getForceOrient( Quat4d rot_, Vec3d& force2, Vec3d& force3, 
 	vec3.set( M.c );
 }
 
-Vec3d tipOnePointMol::getForceRad( Vec3d sysCoordAtom, Vec3d& vec ){  // return force acting on a point-like molecule connected to the tip
+// return force acting on a point-like molecule connected to the tip
+Vec3d tipOnePointMol::getForceRad( Vec3d sysCoordAtom, Vec3d& vec ){
 	Vec3d dR, force;
 	dR.set_sub( sysCoordAtom, pos );
 	forceSpring( kcoeff, dR, force );
@@ -173,7 +180,8 @@ Vec3d tipOnePointMol::getForceRad( Vec3d sysCoordAtom, Vec3d& vec ){  // return 
 	return force;
 }
 
-void tipOnePointMol::renderTip( Vec3d posMol, double radius ){  // render tip graphics
+// render tip graphics
+void tipOnePointMol::renderTip( Vec3d posMol, double radius ){
 	double bondwidth = 0.1;
 	glDeleteLists( tipID, 1 );
 	tipID = glGenLists( 1 );
@@ -195,9 +203,7 @@ void tipOnePointMol::renderTip( Vec3d posMol, double radius ){  // render tip gr
 	glEndList();
 }
 
-void tipOnePointMol::drawTip(){   // draw the tip
-	if( tipID > 0 ){  glCallList( tipID ); }
-}
+void tipOnePointMol::drawTip(){  if( tipID > 0 ){  glCallList( tipID ); }  }
 
 void tipOnePointMol::printTip(){  // print parameters
 	tipOnePoint::printTip();

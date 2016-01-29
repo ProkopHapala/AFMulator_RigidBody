@@ -56,12 +56,12 @@ class scanSpecification {
 	void createZSamplingSequenceLoc( scalarDataWrapper* zSteps ); // TODO: Deprecated
 
 	void initLinear( ){
-		printf( " scan dim   : %i %i %i \n", xdim,    xdim,    xdim    );
+		printf( " scan dim   : %i %i %i \n", xdim,    ydim,    zdim    );
 		printf( " scan step  : %f %f %f \n", xstep,   ystep,   zstep   );
 		printf( " scan offset: %f %f %f \n", xoffset, yoffset, zoffset );
 		xs = new double[xdim];
 		ys = new double[ydim];
-		zs = new double[ydim];
+		zs = new double[zdim];
 		linspace( xdim, xoffset, xstep, xs );
 		linspace( ydim, yoffset, ystep, ys );
 		linspace( zdim, zoffset, zstep, zs );

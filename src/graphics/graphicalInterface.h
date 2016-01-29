@@ -15,9 +15,9 @@ class graphInterface : Screen {
 	public:
 	static const int nScreensMax;
 	Screen* thisScreen = NULL;
-	Screen** screens = NULL;
-	Uint32* screensID = NULL;
-	static float viewMolList[4];			// parameters for molecules' look, KDYZTAK DODELAT
+	Screen** screens   = NULL;
+	Uint32* screensID  = NULL;
+	static float viewMolList[4];	  // FIXME WTF is this ?		// parameters for molecules' look, KDYZTAK DODELAT
 	SDL_Event event;
 	bool scanningBoxFlag;
 	PhysicalSystemEditor* world;
@@ -39,7 +39,7 @@ class graphInterface : Screen {
 };
 
 const int graphInterface::nScreensMax = 1;
-float graphInterface::viewMolList[] = { 5, 4, 1, 0.1 };
+float graphInterface::viewMolList[] = { 5, 4, 1, 0.1 }; // FIXME WTF is this ?
 
 void graphInterface::updateGraphics(){
 	for( int i = 0; i < nScreensMax; i++ ) {
@@ -149,16 +149,16 @@ void graphInterface::inputHandling( bool& loopEnd, bool& skip, bool& stopFlag ){
 					case SDLK_ESCAPE:		loopEnd = true;			break;
 					case SDLK_F1:			showHelp();				break;
 					case SDLK_KP_ENTER:		skip = true;			break;
-					case SDLK_e:			world->exportData();	break;
+					case SDLK_e:			world->exportData(); 	break;
 					case SDLK_SPACE:
 						//world->setSysEvol( stopFlag );
-						world->sysEvol = stopFlag ;
-						stopFlag = !stopFlag;
+						world->sysEvol =  stopFlag ;
+						stopFlag       = !stopFlag;
 						printf( stopFlag ? "inputHandling: Relaxation paused.\n" : "inputHandling: Relaxation unpaused.\n" );
 						break;
 				}
 				break;
-			case SDL_QUIT:	loopEnd = true;	break;
+			case SDL_QUIT: loopEnd = true;	break;
 			case SDL_WINDOWEVENT: // if( graphicalMode ){... ???
 				if( event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED ){
 					//SDL_Log( "Window %d gained focus.", event.window.windowID );

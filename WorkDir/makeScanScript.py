@@ -1,9 +1,10 @@
 #!/usr/bin/python
 import numpy as np
 
-xs = np.linspace( -20, 20, 10 )
-ys = np.linspace( -12, 12, 6 )
-zs = np.linspace(  22, 16, 6 )
+xs = np.linspace( -10,  10,  10 )
+ys = np.linspace(  -6,   6,  6  )
+#zs = np.linspace(  22,  16,  6  )
+zs = np.linspace(  16,  10,  60  )
 
 zs = np.concatenate( (zs, zs[::-1]) )
 

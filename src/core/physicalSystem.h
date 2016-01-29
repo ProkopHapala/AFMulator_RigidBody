@@ -27,9 +27,9 @@ class PhysicalSystem {
 	double fmaxConv = 1e-4;
 	Vec3d fTip;
 
-	bool  sysEvol = true;				    // sysEvol == true iff the system undergoes evolution/relaxation
-	int perFrame = 10;
-	int optSteps = 0;
+	bool   sysEvol = true;				    // sysEvol == true iff the system undergoes evolution/relaxation
+	int    perFrame = 10;
+	int    optSteps = 0;
 	double fmax;
 
 	// ============= FUNCTIONS
@@ -361,20 +361,19 @@ void PhysicalSystem::forcesTipAux( Vec3d centre, Vec3d Mvec, double mult, Vec3d 
 	forceFromPoints( vecaux, vecaux2, tip->probeMol->mol );
 }
 
-void PhysicalSystem::forcesTip( Vec3d& vec ){
 // calculate forces between the tip and a single atom atomToDraw_ in molecule molToDraw_, tip_sys are system coordinates of the tip
+void PhysicalSystem::forcesTip( Vec3d& vec ){
 	double mult = 1;
 	Vec3d sysCoordAtom;
 	Vec3d centre, force;
 	//molToDrawNormal = tip->probeMol->mol;   // FIXME : Don't know what it does here ?
-	sysCoordAtom = systemCoordsOfAtom( tip->probeMol->mol, tip->probeMol->atom );
-	centre = moleculeToSystemCoords( tip->probeMol->mol, tip->probeMol->centreMol );
-	// forces to auxiliary point
-	force = tip->getForceRad( sysCoordAtom, vec );
+	sysCoordAtom = systemCoordsOfAtom    ( tip->probeMol->mol, tip->probeMol->atom      );
+	centre       = moleculeToSystemCoords( tip->probeMol->mol, tip->probeMol->centreMol );
+	force        = tip->getForceRad      ( sysCoordAtom, vec ); // forces to auxiliary point
 	forceFromPoints( tip->probeMol->mol, tip->probeMol->atom, force );
 	// draw axes
-	Vec3d vec_zero;
-	vec_zero.set( 0, 0, 0 );
+	//Vec3d vec_zero;
+	//vec_zero.set( 0, 0, 0 );
 	// drawCoordAxesRot( centre, force, vec_zero, vec_zero, normID[1], 5 );   // FIXME : Don't know what it does here ?
 //	printf( "tip->tip->probeMol->mol = %i, tip->probeMol->atom = %i\n", tip->tip->probeMol->mol, tip->probeMol->atom );
 	if( molecules[tip->probeMol->mol]->natoms > 1 ){

@@ -23,11 +23,11 @@ void setScanningParams( const char* filename, zSamplingMode& zSampling,
 
 		readLineComment( scanFile, str );
 		count = sscanf( str, " %399s", &auxStr );
-		if       ( !strcmp( auxStr, "SCANNING_NONE" )	    ){ scanType = SCANNING_NONE;
+		if       ( !strcmp( auxStr, "SCANNING_NONE" )	   ){ scanType = SCANNING_NONE;
 		} else if( !strcmp( auxStr, "SCANNING_NONE_VIEW" ) ){ scanType = SCANNING_NONE_VIEW;
 		} else if( !strcmp( auxStr, "SCANNING_RASTER" )    ){ scanType = SCANNING_RASTER;
 		} else if( !strcmp( auxStr, "SCANNING_REPLAY" )    ){ scanType = SCANNING_REPLAY;
-		} else if( !strcmp( auxStr, "SCANNING_ONE" ) 	    ){ scanType = SCANNING_ONE;
+		} else if( !strcmp( auxStr, "SCANNING_ONE" ) 	   ){ scanType = SCANNING_ONE;
 		} else if( !strcmp( auxStr, "SCANNING_SCRIPT" )    ){ scanType = SCANNING_SCRIPT;
 		} else {
 			scanType = SCANNING_NONE;
@@ -118,8 +118,8 @@ void setScanningParams( const char* filename, zSamplingMode& zSampling,
 
 		scanType = SCANNING_NONE;
 
-		xdim = 1; ydim = 1; zdim = 1;
-		xstep = 0.2; ystep = 0.2; zstep = 0.2;
+		xdim    = 1;    ydim   = 1;   zdim    = 1;
+		xstep   = 0.2; ystep   = 0.2; zstep   = 0.2;
 		xoffset = -12; yoffset = -13; zoffset = 13;
 
 	}
@@ -148,39 +148,30 @@ void setMoleculeParams( const char* filename, int*& listOfMoleculeInstances, std
 	if( molFile ){
 		printf( "setMoleculeParams:    Values loaded from\t\t%s.\n", filename );
 
-		readLineComment( molFile, str );
-		count = sscanf( str, "%i", &numOfMoleculeTypes );
+		readLineComment( molFile, str ); 		count = sscanf( str, "%i", &numOfMoleculeTypes );
 		if( numOfMoleculeTypes > 1 ) delete [] listOfFileNames; // ???
 		listOfFileNames = new std::string[numOfMoleculeTypes];
 		for( int i = 0; i < numOfMoleculeTypes; i++ ){
-			readLineComment( molFile, str );
-			count = sscanf( str, "%399s", &fileNameLoc );
+			readLineComment( molFile, str );	count = sscanf( str, "%399s", &fileNameLoc );
 			listOfFileNames[i].assign( fileNameLoc );
 			//printf( " ---listOfFileNames[%i] = %s\n", i, listOfFileNames[i].c_str() );
 		}
 //		printf( " listOfFileNames %i \n", listOfFileNames );
 
-		readLineComment( molFile, str );
-		count = sscanf( str, "%i", &numOfMoleculeInstances );
+		readLineComment( molFile, str );		count = sscanf( str, "%i", &numOfMoleculeInstances );
 //		printf( "numOfMoleculeInstances = %d\n", numOfMoleculeInstances );
 		if( numOfMoleculeInstances > 1 ) delete [] listOfMoleculeInstances; // ???
 		listOfMoleculeInstances = new int[numOfMoleculeInstances];
-
 		for( int i = 0; i < numOfMoleculeInstances; i++ ){
-			readLineComment( molFile, str );
-			count = sscanf( str, "%i", &molInst );
+			readLineComment( molFile, str );	count = sscanf( str, "%i", &molInst );
 			if( molInst > numOfMoleculeTypes ){
 				printf( "setMoleculeParams: Out of bounds!!!\n" );
 			}
 			listOfMoleculeInstances[i] = molInst;
 			//printf( "listOfMoleculeInstances[%i] = %i\n", i, listOfMoleculeInstances[i] );
 		}
-
-		readLineComment( molFile, str );
-		count = sscanf( str, "%399s", world_data );
-
-		readLineComment( molFile, str );
-		count = sscanf( str, "%39s", &raw_data_str );
+		readLineComment( molFile, str );		count = sscanf( str, "%399s", world_data );
+		readLineComment( molFile, str );		count = sscanf( str, "%39s", &raw_data_str );
 		raw_data = false;
 		if( count > 0 && !strcmp( raw_data_str, "raw" ) ){
 			raw_data = true;

@@ -1,4 +1,12 @@
 
+
+void DEBUG_DELAY( int n, char* s ){
+	SDL_Delay( 100 );
+	printf( "DEBUG: %s \n", s );
+}
+
+
+
 class appModeRaster : public appModeTipMol {
 	public:
 
@@ -32,49 +40,74 @@ class appModeRaster : public appModeTipMol {
 	void loop( int n );
 
 	appModeRaster(){};
-	appModeRaster( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics, abstractTip* tip, flagList *flags, scanSpecification* scan, fileManager* outputFiles, relaxParams* relaxParameters, int* molOfInterest_, int numMolOfInterest_, fileManager* outputPositMolFiles_ = NULL, fileManager* outputRotatMolFiles_ = NULL );
+	appModeRaster(
+		int                numOfMoleculeInstances,
+		fileManager*       moleculeFiles,
+		AtomTypes*         typeList,
+		fileWrapper*       geometryFile,
+		abstractSurf*      surf,
+		graphInterface*    graphics,
+		abstractTip*       tip,
+		flagList *         flags,
+		scanSpecification* scan,
+		fileManager*       outputFiles,
+		relaxParams*       relaxParameters,
+		int*               molOfInterest_,
+		int                numMolOfInterest_,
+		fileManager*       outputPositMolFiles_ = NULL,
+		fileManager*       outputRotatMolFiles_ = NULL
+	);
 
 	bool convergeTipPos(  double xpos, double ypos, double zpos ){
 		double pixelDataListItem;
 		bool optimizingFlag = true;
 		bool skip           = false;
 		bool stopFlag       = false;
-
+		//DEBUG_DELAY( 100, " 1-1-1 " );
 		if( graphics != NULL ) printf( " starting relaxation at point: (%3.3f,%3.3f,%3.3f)\n", xpos, ypos, zpos );
 		world->tip->setPosition( xpos, ypos, zpos );
-
+		//DEBUG_DELAY( 100, " 1-1-2 " );
 		//for( int iframe = 0; iframe < maxFramesPerPoint; iframe++ ){
 		while( true ){
 			// handle input events
-			if( graphics != NULL )	{ graphics->inputHandling( loopEnd, skip, stopFlag ); }
+			//DEBUG_DELAY( 100, " 1-1-3 " );
+			//printf( " %i %i %i \n", loopEnd, skip, stopFlag );
+			//printf( " s \n"  );
+			//SDL_Event event; SDL_PollEvent( &event ); // WTF? HOW THIS MAY CAUSE ERROR ?   with scanning steps ( 10 6 60 )
+			if( graphics != NULL ){ graphics->inputHandling( loopEnd, skip, stopFlag ); }
 			if( loopEnd || skip  ) return false;
+
+			//DEBUG_DELAY( 100, " 1-1-4" );
 			//if( graphics != NULL && world->tip != NULL ){	graphics->thisScreen->mouseSetAuxPoint( world ); }   // WTF IS THIS ?
 			if( graphics != NULL ){ graphics->updateGraphics(); }
-
+			//DEBUG_DELAY( 100, " 1-1-5 " );
 			if( !stopFlag ){
 				if( world->sysEvol ){
 					world->update( optimizingFlag );
 				}
-
+				//DEBUG_DELAY( 100, " 1-1-6 " );
 				if( !optimizingFlag ){
 		//			printf( "convergStep = %i\n", convergStep );
 					return true;
 				}
+				//DEBUG_DELAY( 100, " 1-1-7 " );
 				if( world->optSteps > convergStepLimit ){
 					if( !suppressOutput ){
 		//				printf( "appModeRaster::loop: Relaxation in step %5i does not converge. Skipped.\n", ind );
 						//printf( "appModeRaster::loop: step (ix,iy,iz) %5i %5i %5i Relaxation not converge in %5i. Skipped.\n", xind, yind, zind, convergStepLimit );
 						printf( "Relaxation not converge in %i iterations, fmax = %f ( f2conv = %f )\n", convergStepLimit, world->fmax, world->fmaxConv );
 					}
+					//DEBUG_DELAY( 100, " 1-1-8 " );
 		//			printf( "xind, yind, zind = %d %d %d\n", xind, yind, zind );
 					numOfNoncovergCases++;
 					return false;
 				}
-
+			//DEBUG_DELAY( 100, " 1-1-9 " );
 			}
 		} // iframe
 		return false;
 		// saving data to lists
+		//DEBUG_DELAY( 100, " 1-1-10 " );
 	}
 
 };
@@ -88,9 +121,29 @@ void appModeRaster::resetup( void ){
 
 }
 
-appModeRaster::appModeRaster( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics, abstractTip* tip, flagList *flags, scanSpecification* scan, fileManager* outputFiles_, relaxParams* relaxParameters, int* molOfInterest_, int numMolOfInterest_, fileManager* outputPositMolFiles_, fileManager* outputRotatMolFiles_ )
-// constructor
-: scan( scan ), outputFiles( outputFiles_ ), numMolOfInterest( numMolOfInterest_ ), outputPositMolFiles( outputPositMolFiles_ ), outputRotatMolFiles( outputRotatMolFiles_ ), appModeTipMol( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags )
+appModeRaster::appModeRaster(
+	int numOfMoleculeInstances,
+	fileManager* moleculeFiles,
+	AtomTypes* typeList,
+	fileWrapper* geometryFile,
+	abstractSurf* surf,
+	graphInterface* graphics,
+	abstractTip* tip,
+	flagList *flags,
+	scanSpecification* scan,
+	fileManager* outputFiles_,
+	relaxParams* relaxParameters,
+	int* molOfInterest_,
+	int numMolOfInterest_,
+	fileManager* outputPositMolFiles_,
+	fileManager* outputRotatMolFiles_
+):
+	scan               ( scan ),
+	outputFiles        ( outputFiles_ ),
+	numMolOfInterest   ( numMolOfInterest_ ),
+	outputPositMolFiles( outputPositMolFiles_ ),
+	outputRotatMolFiles( outputRotatMolFiles_ ),
+	appModeTipMol      ( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags )
 {
 	world->optimizer->dt       = relaxParameters->glob_dtmax;
 	world->optimizer->damping  = relaxParameters->glob_damping;
@@ -117,6 +170,7 @@ void appModeRaster::loop( int n ){
 	// allocation of data lists
 	int    total        = (scan->xdim)*(scan->ydim)*(scan->zdim);
 	int metadataList[]  = { scan->xdim, scan->ydim, scan->zdim, total };
+
 	pixelDataList = new scalarDataWrapper( total, metadataList, "pixels" );
 	positDataList = new vectorDataWrapper( total, metadataList, "trajectories" );
 	rotatDataList = new quaterDataWrapper( total, metadataList, "rotations" );
@@ -128,6 +182,7 @@ void appModeRaster::loop( int n ){
 	}
 	// generation of z-step sequence
 	scalarDataWrapper* zSteps = new scalarDataWrapper( scan->zdim, metadataList, "z-steps" );
+
 	//scan->createZSamplingSequenceLoc( zSteps );
 	scan->zstep *= -1;
 	scan->initLinear();
@@ -143,6 +198,9 @@ void appModeRaster::loop( int n ){
 	numOfNoncovergCases = 0;
 	loopEnd             = false;
 	printf( "\n=== CALCULATION LOOP INITIATED ===\n" );
+
+	DEBUG_DELAY( 1000, " 1 " );
+
 	for( int yind = scan->ydim - 1; yind >= 0; yind-- ){
 	//for( int yind = 0; yind < scan->ydim ; yind++ ){
 		//double ypos = yind*scan->ystep + scan->yoffset;
@@ -155,8 +213,9 @@ void appModeRaster::loop( int n ){
 			if( !suppressOutput ){	printf( "relaxing z-line (ix,iy) %5i %5i \n", xind, yind ); }
 			for( int zind = 0; zind < scan->zdim ; zind++ ){
 				double zpos = scan->zs[zind];
-
+				//DEBUG_DELAY( 100, " 1-1 " );
 				bool converged = convergeTipPos( xpos, ypos, zpos ); // most important part
+				//CHECK( 2 );
 
 				if( converged ){
 					ind = (scan->ydim - 1 - yind)*scan->xdim*scan->zdim + xind*scan->zdim + zind;
@@ -172,12 +231,15 @@ void appModeRaster::loop( int n ){
 					}
 				}
 
+				//CHECK( 3 );
 			} // zind
 			if( loopEnd ) break;
-			resetup();
+			//resetup();
 		} // xind
 		if( loopEnd ) break;
 	} // yind
+
+	DEBUG_DELAY( 1000, " 2 " );
 
 	printf( "\n=== SCANNING SUMMARY ===\n" );
 	if( loopEnd ) printf( "appModeRaster::loop: Last index calculated is %i out of %i.\n", ind, total );
@@ -199,7 +261,7 @@ void appModeRaster::loop( int n ){
 	// deallocation
 	delete pixelDataList;
 	delete positDataList;
-	delete zSteps;
+	//delete zSteps;
 	delete rotatDataList;
 
 	if( saveMolOfInterestMovement ){

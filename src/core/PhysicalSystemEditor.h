@@ -5,37 +5,26 @@
 #include <string.h>
 #include <stdio.h>
 
-//#include "tipProcedures.h"
-
-#define PI 3.1415926535
-
-//class Screen; // forward declaration
-
 class PhysicalSystemEditor: public PhysicalSystem {
 	public:
 
 	// picked atom and molecule indices
 	Vec3d*	atomToDrawOrigPos = NULL;		// position of a chosen atom at the moment of a mouse click, used to determine the plane in which the atom is moved by a mouse
-	double distance;
-
-	bool mouseTip = false;
+	double  distance;
+	bool    mouseTip = false;
 
 	// picked atom and molecule indices and flags
-
-	int	  numPickedAtoms = 3;			// how many atoms form a complete selection
-	int*  pickedAtoms = NULL;			// indices of atoms in a selection
-	int	  pickedAtomCounter = 0;			// how many atoms are already picked to form a selection
-	int	  molToDrawPrev = -1;			// which molecule was chosen previously
-
-	bool  atomHold = false;			        // atomHold == true iff the mouse is holding an atom
-	int   atomToDraw = -1, molToDraw = -1;	// indices of atom and corresponding molecule which are to be picked by a mouse click
-
-	bool  molHold  = false;			// molHold == true iff the mouse is holding a molecule
-	float atomscale	= 0.3;			// scale with which the atoms are rendered on the screen
-	float atomscaleEmph	= 0.7;			// scale with which the emphasized atoms are rendered on the screen
+	int	  numPickedAtoms = 3;               // how many atoms form a complete selection
+	int*  pickedAtoms    = NULL;            // indices of atoms in a selection
+	int   pickedAtomCounter = 0;            // how many atoms are already picked to form a selection
+	int	  molToDrawPrev  = -1;              // which molecule was chosen previously
+	bool  atomHold   = false;               // atomHold == true iff the mouse is holding an atom
+	int   atomToDraw = -1, molToDraw = -1;  // indices of atom and corresponding molecule which are to be picked by a mouse click
+	bool  molHold       = false;            // molHold == true iff the mouse is holding a molecule
+	float atomscale	    = 0.3;              // scale with which the atoms are rendered on the screen
+	float atomscaleEmph	= 0.7;              // scale with which the emphasized atoms are rendered on the screen
 
 	// miscellaneous graphics
-
 	GLuint normalID = 0;
 	GLuint normID[3] = { 0, 0, 0 };
 	int molToDrawNormal = -1;
@@ -46,7 +35,6 @@ class PhysicalSystemEditor: public PhysicalSystem {
 	void draw();
 	void drawAuxPoint();
 	void mouseSetAuxPoint( float mouseA, float mouseB, Vec3d scCamRight, Vec3d scCamUp, Vec3d scCamDir );
-	//void update( bool& optimizingFlag, double& pixelDataListItem );
 
 	// selection of atoms
 	bool addPickedAtom        ();
@@ -54,22 +42,16 @@ class PhysicalSystemEditor: public PhysicalSystem {
 	bool destroySelection     ();
 	bool selectionChosen      ();
 	void resetOneAtomMove     ();
-	bool moveAtom( Vec3d systemCoords );
-	bool moveMolecule( Vec3d systemCoords );
+	bool moveAtom      ( const Vec3d& systemCoords );
+	bool moveMolecule  ( const Vec3d& systemCoords );
 	bool rayPickAtomSet( const Vec3d& ray0, const Vec3d& hRay, bool emphasized );
-	//void setAtomHold( bool atomHold_ );
-	//bool getAtomHold();
-	//void setMolHold( bool molHold_ );
-	//bool getMolHold();
-	//int  getMolToDraw();
-	//int  getAtomToDraw();
 
 	void setTemporaryAuxPoint( bool temporaryAuxPoint_ );
 	bool getTemporaryAuxPoint();
 
 	// molecule adjusting
-	void adjustMolecule( char* end, double phi, Vec3d vec_pos, Vec3d vec_a, Vec3d vec_b );
-	void adjustMoleculeSelection( char* end, Vec3d vec_pos, Vec3d vec_a, Vec3d vec_b );
+	void adjustMolecule             ( char* end, double phi, Vec3d vec_pos, Vec3d vec_a, Vec3d vec_b );
+	void adjustMoleculeSelection    ( char* end,             Vec3d vec_pos, Vec3d vec_a, Vec3d vec_b );
 	void setFromStdinAdjustMolecule         ();
 	void setFromStdinAdjustMoleculeSelection();
 	void adjustMoleculeSelectionXaxis       ();
@@ -78,8 +60,8 @@ class PhysicalSystemEditor: public PhysicalSystem {
 
 	void adjustNormalAxis      ( Vec3d axis_one, Vec3d axis_two );
 	void adjustNormalAxisMatrix( Vec3d axis_one, Vec3d axis_two );
-	void rotateMolAxis         ( Vec3d a, Vec3d b );
-	void rotateMolAxisNoGonio  ( Vec3d a, Vec3d b );
+	void rotateMolAxis         ( Vec3d a,        Vec3d b );
+	void rotateMolAxisNoGonio  ( Vec3d a,        Vec3d b );
 	void adjustPosition        ( Vec3d vec_pos    );
 
 	// ============= inline functions
@@ -115,25 +97,19 @@ PhysicalSystemEditor::PhysicalSystemEditor( fileWrapper* geometryFile, int numOf
 		surf		= NULL;
 	} else {
 		printf( "PhysicalSystem:\t\tLoading physical system from\t%s.\n", geometryFile->getFileName() );
-
 		int itype, count, notRigidAux, nmolsAux;
 		Mat3d M;
 		char str[600];
 		bool probeMoleculePresent = false;
-
 		if( tip_ != NULL && tip_->probeMol != NULL ) probeMoleculePresent = true;
-
 		geometryFile->readLineToString( str );
 		count = sscanf( str, " %i", &nmolsAux );
 		( probeMoleculePresent ) ? nmols = nmolsAux + 1 : nmols = nmolsAux; // extra molecule is the probe molecule
 		printf( "PhysicalSystem:\t\tNumber of molecules: nmols = %i \n", nmols );
-
 		molecules = new MoleculeType*[nmols];
 		notRigid = new bool[nmols];
 		initParams();
-
 		// molTypeList is a list of (numOfMoleculeInstances) lists
-
 		for( int i = 0; i < nmolsAux; i++ ){
 			geometryFile->readLineToString( str );
 			if( geometryFile->isRaw() ){
@@ -150,16 +126,13 @@ PhysicalSystemEditor::PhysicalSystemEditor( fileWrapper* geometryFile, int numOf
 
 				if( count < 11 ) notRigidAux = true;
 			}
-
 			notRigid[i] = notRigidAux; // not used notRigid[i] in sscanf directly since in that case Valgrind issues an error
 			if( itype - 1 > numOfMoleculeInstances ){
 				printf( "PhysicalSystem: Too little molecule instances. Set to the maximum possible value. \n" );
 				itype = numOfMoleculeInstances;
 			}
 			molecules[i] = molTypeList[itype - 1];
-
 		}
-
 		// probe molecule
 		if( probeMoleculePresent ){
 			molecules[nmols - 1] = molTypeList[numOfMoleculeInstances];
@@ -167,22 +140,17 @@ PhysicalSystemEditor::PhysicalSystemEditor( fileWrapper* geometryFile, int numOf
 			rot[nmols - 1].set( tip_->probeMol->rot );
 			notRigid[nmols - 1] = true;
 		}
-
-//		CHECK(8)
-
+		//CHECK(8)
 		geometryFile->close();
 
 		tip = tip_;
 		surf = surf_;
-//		if( tip != NULL ) tip->printTip();
-//		surf->printSurf();
-
-//		CHECK(7)
+		//if( tip != NULL ) tip->printTip();
+		//surf->printSurf();
+		//CHECK(7)
 		initTPoints();
 		makeFF();
-
 	}
-
 }
 
 // ============== Graphics ==============
@@ -259,7 +227,7 @@ void PhysicalSystemEditor::resetOneAtomMove(){   // go one step backward, i.e. r
 	}
 }
 
-bool PhysicalSystemEditor::moveAtom( Vec3d systemCoords ){    // if a picked atom is moved, set the new position of the atom
+bool PhysicalSystemEditor::moveAtom( const Vec3d& systemCoords ){    // if a picked atom is moved, set the new position of the atom
 	if( !atomHold ){return false;}
 	Vec3d atomCoords;
 	atomCoords = systemToMoleculeCoords( molToDraw, systemCoords );
@@ -268,7 +236,7 @@ bool PhysicalSystemEditor::moveAtom( Vec3d systemCoords ){    // if a picked ato
 	return true;
 }
 
-bool PhysicalSystemEditor::moveMolecule( Vec3d systemCoords ){  // if a picked molecule is moved, set the new position of the molecule
+bool PhysicalSystemEditor::moveMolecule( const Vec3d& systemCoords ){  // if a picked molecule is moved, set the new position of the molecule
 	if( !molHold ){ return false; }
 	Vec3d molCoords;
 	pos[molToDraw].set( molCoords );

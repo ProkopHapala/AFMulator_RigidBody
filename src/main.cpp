@@ -105,10 +105,10 @@ int numOfMoleculeInstances;		// number of molecule instances, many molecules may
 
 // SCANNING
 
-scanSpecification* scan = new scanSpecification();
-relaxParams* relaxParameters = new relaxParams;
-graphInterface* graphics = NULL;
-abstractAppMode* app = NULL;
+scanSpecification* scan            = new scanSpecification();
+relaxParams*       relaxParameters = new relaxParams;
+graphInterface*    graphics        = NULL;
+abstractAppMode*   app             = NULL;
 
 int* molOfInterest;
 int numMolOfInterest;
@@ -185,27 +185,27 @@ void setupApp( bool& loopEnd ){
 	switch( scan->scanType ){
 		case SCANNING_NONE_VIEW:
 			printf( ">>> Initializing: appModeView \n" );
-			app = new appModeView( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics );
+			app = new appModeView      ( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics );
 			break;
 		case SCANNING_NONE:
 			printf( ">>>  Initializing: appModeRelax \n" );
-			app = new appModeRelax( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, flags );
+			app = new appModeRelax     ( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, flags );
 			break;
 		case SCANNING_ONE:
 			printf( ">>> Initializing: appModeTipMolOne \n" );
-			app = new appModeTipMolOne( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags );
+			app = new appModeTipMolOne ( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags );
 			break;
 		case SCANNING_RASTER:
 			printf( ">>> Initializing: appModeRaster \n" );
-			app = new appModeRaster( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, relaxParameters, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
+			app = new appModeRaster    ( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, relaxParameters, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
 			break;
 		case SCANNING_SCRIPT:
 			printf( ">>> Initializing: appModeRaster \n" );
-			app = new appModeFileScript( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, relaxParameters, molOfInterest, numMolOfInterest );
+			app = new appModeFileScript( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, relaxParameters, molOfInterest, numMolOfInterest );
 			break;
 		case SCANNING_REPLAY:
 			printf( ">>> Initializing: appModeReplay \n" );
-			app = new appModeReplay( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
+			app = new appModeReplay    ( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags, scan, outputFiles, molOfInterest, numMolOfInterest, outputPositMolFiles, outputRotatMolFiles );
 			break;
 	}
 
