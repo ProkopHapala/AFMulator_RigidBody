@@ -182,6 +182,7 @@ void appModeFileScript::command_startStroke( char * line ){
 	double x,y,z;
 	sscanf( line, "%lf %lf %lf", &x, &y, &z );
 	printf( "   starting stroke at %f %f %f \n", x, y, z );
+	world->resetGeometry( geometryFile, posProbe, rotProbe );
 	world->tip->setPosition( x, y, z );
 	world->adjustMolToTip();
 }

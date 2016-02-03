@@ -36,7 +36,7 @@ class appModeRaster : public appModeTipMol {
 
 	// ======== Functions
 
-	void resetup( void );
+	//void resetup( void );
 	void loop( int n );
 
 	appModeRaster(){};
@@ -115,11 +115,10 @@ class appModeRaster : public appModeTipMol {
 
 // ================= appModeRaster procedures =================
 
-void appModeRaster::resetup( void ){
+//void appModeRaster::resetup( void ){
 // resetup the world geometry
-	world->resetGeometry( geometryFile, posProbe, rotProbe );
-
-}
+//	world->resetGeometry( geometryFile, posProbe, rotProbe );
+//}
 
 appModeRaster::appModeRaster(
 	int numOfMoleculeInstances,
@@ -208,6 +207,8 @@ void appModeRaster::loop( int n ){
 		for( int xind = 0; xind < scan->xdim; xind++ ){
 			//double xpos = xind*scan->xstep + scan->xoffset;
 			double xpos = scan->xs[xind];
+			//resetup();
+			world->resetGeometry( geometryFile, posProbe, rotProbe );
 			world->tip->setPosition( xpos, ypos, scan->zs[0] );
 			world->adjustMolToTip();
 			if( !suppressOutput ){	printf( "relaxing z-line (ix,iy) %5i %5i \n", xind, yind ); }
@@ -234,7 +235,6 @@ void appModeRaster::loop( int n ){
 				//CHECK( 3 );
 			} // zind
 			if( loopEnd ) break;
-			//resetup();
 		} // xind
 		if( loopEnd ) break;
 	} // yind

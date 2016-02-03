@@ -20,8 +20,7 @@ class appModeTipMolOne : public appModeTipMol, public InputHandler {
 
 appModeTipMolOne::appModeTipMolOne( int numOfMoleculeInstances, fileManager* moleculeFiles, AtomTypes* typeList, fileWrapper* geometryFile, abstractSurf* surf, graphInterface* graphics, abstractTip* tip, flagList *flags )
 // constructor
-: appModeTipMol( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags )
-{
+: appModeTipMol( numOfMoleculeInstances, moleculeFiles, typeList, geometryFile, surf, graphics, tip, flags ){
 	if( graphics != NULL){
 		graphics->userInputHandler = this;
 	}
@@ -53,6 +52,7 @@ void appModeTipMolOne::loop( int n ){  // one z-axis scanning loop
 		printf( "appModeTipMolOne::loop: No world exists. Halt.\n" );
 		return;
 	}
+	world->perFrame = 100;
 	world->tip->setPosition( xpos, ypos, zpos );
 	world->adjustMolToTip();
 	world->optSteps = 0;
